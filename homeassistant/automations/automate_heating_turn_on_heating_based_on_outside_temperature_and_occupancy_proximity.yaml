@@ -1,0 +1,93 @@
+alias: >-
+  Automate Heating - Turn On Heating Based On Outside Temperature and
+  Occupancy/Proximity
+description: >-
+  This automation will turn off the heating if the following are true;
+
+  * The outside temperature is less than or equal to the threshold (default: 15)
+
+  * The time of day falls inside of the operating hours (default: 07:00-16:00)
+
+  * The heating is currently turned off
+
+  * Somebody is home
+
+
+  OR
+
+
+  * The heating is currently turned off
+
+  * The average household temperature is less than or equal to the threshold
+  (default: 19)
+
+  * Somebody is home
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.ibs_th_10f3_temperature
+condition:
+  - condition: template
+    value_template: >-
+      {{ state_attr('sensor.ibs_th_10f3_temperature', 'temperature')|float(2) <=
+      states('input_number.heating_automation_setpoint')|float(2) }}
+  - condition: or
+    conditions:
+      - condition: and
+        conditions:
+          - condition: time
+            after: input_datetime.heating_automation_end_time
+            before: input_datetime.heating_automation_start_time
+          - condition: state
+            entity_id: climate.home
+            state: "off"
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: sensor.people_home
+                state: "True"
+                for:
+                  hours: 0
+                  minutes: 1
+                  seconds: 0
+                alias: Occupancy detected for 1 minute
+              - condition: numeric_state
+                entity_id: climate.home
+                below: "1"
+                alias: Proximity sensor detects occupancy
+            alias: Occupancy sensor(s) detect occupancy
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: climate.home
+            state: "off"
+            alias: The heating is currently off
+          - condition: numeric_state
+            entity_id: sensor.average_household_temperature
+            below: input_number.heating_automation_minimum_internal_temperature
+            alias: Average household temperature is below the threshold
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: sensor.people_home
+                state: "True"
+                for:
+                  hours: 0
+                  minutes: 1
+                  seconds: 0
+                alias: Occupancy detected for 1 minute
+              - condition: numeric_state
+                entity_id: proximity.home
+                below: "1"
+                alias: Proximity sensor detects occupancy
+action:
+  - service: evohome.reset_system
+    data: {}
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      title: Home Assistant
+      message: Heating turned on by climate control and/or proximity
+mode: single
