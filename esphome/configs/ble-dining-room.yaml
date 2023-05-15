@@ -1,0 +1,114 @@
+substitutions:
+  devicename: ble-dining-room
+  devicename_upper: BLE-Dining-Room
+
+esphome:
+  name: $devicename
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_key
+
+web_server:
+  port: 80
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+#   Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "$devicename Fallback Hotspot"
+    password: !secret ap_password
+
+captive_portal:
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+
+bluetooth_proxy:
+  active: true
+
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+    ssid:
+      name: "SSID"
+    bssid:
+      name: "BSSID"
+    mac_address:
+      name: "Mac Address"
+  - platform: template
+    name: Uptime Human Readable
+    id: uptime_human
+    icon: mdi:clock-start
+
+button:
+  - platform: restart
+    name: "$devicename Restart"
+  - platform: safe_mode
+    name: "$devicename Restart (Safe Mode)"
+  - platform: factory_reset
+    name: "$devicename Factory Reset"
+
+sensor:
+  - platform: uptime
+    name: Uptime Sensor
+    id: uptime_sensor
+    update_interval: 60s
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: uptime_human
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              return (
+                (days ? to_string(days) + "d " : "") +
+                (hours ? to_string(hours) + "h " : "") +
+                (minutes ? to_string(minutes) + "m " : "") +
+                (to_string(seconds) + "s")
+              ).c_str();
+
+  - platform: wifi_signal
+    name: "$devicename_upper WiFi Signal Sensor"
+    update_interval: 60s
+  - platform: uptime
+    name: "$devicename_upper Uptime Sensor"
+  - platform: bme280
+    temperature:
+      name: "$devicename_upper Temperature"
+      oversampling: 16x
+    pressure:
+      name: "$devicename_upper Pressure"
+    humidity:
+      name: "$devicename_upper Humidity"
+    address: 0x76
+    update_interval: 60s
