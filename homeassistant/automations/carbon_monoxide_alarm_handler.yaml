@@ -1,0 +1,40 @@
+alias: Carbon Monoxide Alarm Handler
+description: ""
+trigger:
+  - type: gas
+    platform: device
+    device_id: eb34842260ff4412790dea2b0e13b5e8
+    entity_id: binary_sensor.heiman_cosensor_ef_3_0_iaszone
+    domain: binary_sensor
+    id: Detected
+  - type: no_gas
+    platform: device
+    device_id: eb34842260ff4412790dea2b0e13b5e8
+    entity_id: binary_sensor.heiman_cosensor_ef_3_0_iaszone
+    domain: binary_sensor
+    id: Cleared
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    enabled: false
+  - platform: state
+    entity_id:
+      - binary_sensor.heiman_cosensor_ef_3_0_iaszone
+    from: "on"
+    to: "off"
+    id: Cleared
+condition: []
+action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: true
+      is_debug: false
+      is_system: false
+      title: >-
+        Carbon Monoxide {{ trigger.id.title() }} in {{
+        area_name(trigger.entity_id) }}!
+      message: >-
+        Carbon Monoxide {{ trigger.id.title() }} in {{
+        area_name(trigger.entity_id) }}!
+mode: single
