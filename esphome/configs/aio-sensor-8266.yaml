@@ -1,0 +1,235 @@
+esphome:
+  name: aio-sensor-8266
+  friendly_name: AIO-Sensor-8266
+
+esp8266:
+  board: d1_mini
+  restore_from_flash: true
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Aio-Sensor-8266 Fallback Hotspot"
+    password: !secret ap_password
+
+captive_portal:
+
+web_server:
+  port: 80
+
+i2c:
+  sda: D1
+  scl: D2
+  scan: true
+  id: bus_a
+
+uart:
+  id: uart_1
+  tx_pin: TX
+  rx_pin: RX
+  baud_rate: 256000
+  parity: NONE
+  stop_bits: 1
+
+ld2410:
+  timeout: 150s
+
+sensor:
+  - platform: uptime
+    name: Uptime Sensor
+    id: uptime_sensor
+    update_interval: 60s
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: uptime_human
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              return (
+                (days ? to_string(days) + "d " : "") +
+                (hours ? to_string(hours) + "h " : "") +
+                (minutes ? to_string(minutes) + "m " : "") +
+                (to_string(seconds) + "s")
+              ).c_str();
+
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 60s
+  - platform: uptime
+    name: "Uptime Sensor"
+  - platform: ld2410
+    moving_distance:
+      name : Moving Distance
+    still_distance:
+      name: Still Distance
+    moving_energy:
+      name: Move Energy
+    still_energy:
+      name: Still Energy
+    detection_distance:
+      name: Detection Distance
+  - platform: bme280
+    temperature:
+      name: "Temperature"
+      oversampling: 16x
+      filters:
+        - lambda: |-
+            return x + float(id(temp_offset).state);
+    pressure:
+      name: "Pressure"
+    humidity:
+      name: "Humidity"
+    i2c_id: bus_a
+    address: 0x76
+    update_interval: 60s
+  - platform: bh1750
+    name: "Illuminance"
+    address: 0x23
+    update_interval: 10s
+
+binary_sensor:
+  - platform: ld2410
+    has_target:
+      name: Presence
+      id: has_target
+      filters:
+      - delayed_off: 2s
+    has_moving_target:
+      name: Moving Target
+      id: has_moving_target
+      filters:
+      - delayed_off: 2s
+    has_still_target:
+      name: Still Target
+      id: has_still_target
+      filters:
+      - delayed_off: 2s
+  - platform: gpio
+    pin: D0
+    name: "PIR Sensor"
+    id: pir_sensor
+    device_class: motion
+    filters:
+    - delayed_off: 2s
+
+  - platform: template
+    name: mmwave_pir_combined
+    id: mmwave_pir_combined
+    device_class: motion
+    filters:
+      - delayed_off: 2s
+    lambda: |-
+      if ( ( id(has_moving_target).state ) and id(pir_sensor).state) {
+        return true;
+      } 
+      else if ( id(has_moving_target).state == 0 and id(pir_sensor).state == 0) {
+        return false;
+      } 
+      else {
+        return id(mmwave_pir_combined).state;
+      }
+    on_state:
+      - if: 
+          condition:
+            - switch.is_off: disable_led
+            - binary_sensor.is_on: mmwave_pir_combined
+          then:
+            - light.turn_on: internal_led
+          else:
+            - logger.log: "LED is disabled so did not handle LED."
+      - if:
+          condition:
+            - switch.is_off: disable_led
+            - binary_sensor.is_off: mmwave_pir_combined
+          then:
+            - light.turn_off: internal_led
+          else:
+            - logger.log: "LED is disabled so did not handle LED."
+
+light:
+  - platform: status_led
+    name: "LED"
+    id: internal_led
+    internal: true
+    pin:
+      number: GPIO2
+      inverted: true
+
+switch:
+  - platform: template
+    name: "Disable LED"
+    id: disable_led
+    restore_state: yes
+    optimistic: true
+    turn_on_action:
+      - if:
+          condition:
+            - light.is_on: internal_led
+          then:
+            - logger.log: "LED disabled = active LED turned off."
+            - light.turn_off: internal_led
+          else:
+            - logger.log: "LED disabled - no active LED to handle."
+    turn_off_action:
+      - if: 
+          condition:
+            - binary_sensor.is_on: mmwave_pir_combined
+          then:
+            - logger.log: "LED enabled - active movement, LED turned on."
+            - light.turn_on: internal_led
+          else:
+            - logger.log: "LED enabled - no active movement."
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+    ssid:
+      name: "SSID"
+    bssid:
+      name: "BSSID"
+    mac_address:
+      name: "Mac Address"
+  - platform: template
+    name: Uptime Human Readable
+    id: uptime_human
+    icon: mdi:clock-start
+
+button:
+  - platform: restart
+    name: "Restart"
+  - platform: safe_mode
+    name: "Restart (Safe Mode)"
+  - platform: factory_reset
+    name: "Factory Reset"
+
+number:
+  - platform: template
+    name: "Temperature Offset"
+    id: temp_offset
+    min_value: -10.0
+    max_value: 10.0
+    initial_value: 0.0
+    step: 0.5
+    restore_value: true
+    optimistic: true
