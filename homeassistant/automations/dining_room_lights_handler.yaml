@@ -1,0 +1,186 @@
+alias: Dining Room Lights Handler
+description: ""
+trigger:
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+    id: 1_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_1
+    id: 1_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_1
+    id: 1_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_2
+    id: 2_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_2
+    id: 2_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_2
+    id: 2_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_3
+    id: 3_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_3
+    id: 3_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_3
+    id: 3_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_4
+    id: 4_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_4
+    id: 4_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_4
+    id: 4_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_5
+    id: 5_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_5
+    id: 5_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_5
+    id: 5_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_6
+    id: 6_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_6
+    id: 6_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_6
+    id: 6_Hold
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: 1_Single
+        sequence:
+          - service: light.toggle
+            data:
+              transition: 2
+              color_temp: 238
+              brightness_pct: 100
+            target:
+              entity_id: light.dining_room_lights
+      - conditions:
+          - condition: trigger
+            id: 1_Double
+        sequence:
+          - service: light.turn_on
+            data:
+              transition: 2
+              color_temp: 238
+              brightness_pct: 100
+            target:
+              entity_id: light.dining_room_lights
+      - conditions:
+          - condition: trigger
+            id: 1_Hold
+        sequence:
+          - service: light.turn_off
+            data:
+              transition: 2
+            target:
+              entity_id: light.dining_room_lights
+      - conditions:
+          - condition: trigger
+            id: 3_Single
+        sequence:
+          - service: light.turn_on
+            data:
+              brightness_step_pct: -10
+            target:
+              entity_id: light.dining_room_lights
+      - conditions:
+          - condition: trigger
+            id: 4_Single
+        sequence:
+          - service: light.turn_on
+            data:
+              brightness_step_pct: 10
+            target:
+              entity_id: light.dining_room_lights
+      - conditions:
+          - condition: trigger
+            id: 5_Single
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: >
+                {{state_attr('light.dining_room_lights', 'color_temp')|int +
+                34.6}}
+            target:
+              entity_id: light.dining_room_lights
+      - conditions:
+          - condition: trigger
+            id: 6_Single
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: >
+                {{state_attr('light.dining_room_lights', 'color_temp')|int -
+                34.6}}
+            target:
+              entity_id: light.dining_room_lights
+mode: restart
