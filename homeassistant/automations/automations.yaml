@@ -1,0 +1,3658 @@
+- id: '1642965174159'
+  alias: Start of Kids Bedtime
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.start_of_kids_bedtime
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 50
+      color_name: darkviolet
+    target:
+      entity_id: light.signify_netherlands_b_v_llc013_huelight
+  mode: single
+- id: '1642965384035'
+  alias: Kids Lights Out
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.kids_lights_out
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 20
+      color_name: violet
+    target:
+      entity_id: light.signify_netherlands_b_v_llc013_huelight
+  mode: single
+- id: '1643101162633'
+  alias: Turn off all lights in kids bedroom
+  description: Turn off all lights in kids bedroom at 08:30 on a workday or 09:00
+    at any other time
+  trigger:
+  - platform: time
+    at: input_datetime.kids_lights_off_weekday
+  - platform: time
+    at: input_datetime.kids_lights_off_weekend
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.workday_sensor
+      state: 'on'
+    - condition: time
+      after: 08:55:00
+      weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+      - sat
+      - sun
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.all_kids_bedroom_lights
+  mode: single
+- id: '1643165481081'
+  alias: Turn Off Master Bedroom Lights Daily
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.master_bedroom_lights_off_am
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.all_master_bedroom_lights
+  mode: single
+- id: '1643465573814'
+  alias: Low battery level detection & notification for all battery sensors
+  description: ''
+  use_blueprint:
+    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
+    input:
+      actions:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: false
+          title: Low battery warning!
+          message: Low Battery detected on device {{sensors}}. Charge or replace the
+            battery/batteries as soon as possible.
+      - service: notify.persistent_notification
+        data:
+          message: Low Battery detected on device {{sensors}}. Charge or replace the
+            battery/batteries as soon as possible.
+          title: Low battery warning!
+      exclude:
+        entity_id:
+        - sensor.myphone_battery_level
+        - sensor.myphone_battery_state
+        - sensor.jessicaiphone_battery_level
+        - sensor.macos_internal_battery_level
+        - sensor.jonathans_ipad_pro_battery_level
+      threshold: 20
+- id: '1643466860803'
+  alias: Master Bedroom Light Sunrise Effect
+  description: ''
+  use_blueprint:
+    path: sbyx/wake-up-light-alarm-with-sunrise-effect.yaml
+    input:
+      manual_time: 06:45:00
+      light_entity: light.bed_light_huelight
+      sunrise_duration: 45
+      check_entity: binary_sensor.workday_sensor
+- id: '1648915782728'
+  alias: openHASP Comms Cabinet back to page 1
+  trigger:
+  - platform: template
+    value_template: '{{ state_attr(''openhasp.comms_cabinet'',''idle'') != ''off''
+      }}'
+    for: 00:00:01
+  condition:
+  - condition: template
+    value_template: '{{ states(''openhasp.comms_cabinet'') != ''1'' and states(''openhasp.comms_cabinet'')
+      != ''unavailable'' }}'
+  action:
+  - service: openhasp.change_page
+    data:
+      page: 1
+    target:
+      entity_id: openhasp.comms_cabinet
+- id: '1648916510909'
+  alias: openHASP Night mode
+  trigger:
+  - platform: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    below: -1
+  condition:
+  - condition: template
+    value_template: '{{ (as_timestamp(now()) - as_timestamp(states(''sensor.uptime_78'')))
+      / 60 > 2 }}'
+  action:
+  - service: mqtt.publish
+    data:
+      topic: hasp/plates/config/gui
+      payload: '{"idle2":120}'
+- id: '1648916529373'
+  alias: openHASP Day mode
+  trigger:
+  - platform: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    above: 1
+  condition:
+  - condition: template
+    value_template: '{{ (as_timestamp(now()) - as_timestamp(states(''sensor.uptime_78'')))
+      / 60 > 2 }}'
+  action:
+  - service: mqtt.publish
+    data:
+      topic: hasp/plates/config/gui
+      payload: '{"idle2":0}'
+- id: '1650279657325'
+  alias: No Occupancy Detected
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.people_home
+    to: 'False'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    from: 'True'
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      message: No occupancy detected for five minutes!
+  - service: script.away_mode
+    data: {}
+  mode: single
+- id: '1650279683721'
+  alias: Occupancy Detected
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.people_home
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    from: 'False'
+    to: 'True'
+  condition: []
+  action:
+  - parallel:
+    - service: script.notification_handler
+      data_template:
+        is_critical: false
+        is_debug: false
+        is_system: false
+        message: Occupancy detected for two minutes!
+    - service: script.1682284192701
+      data: {}
+    - type: turn_on
+      device_id: b10706c56923680ebd822ca2da14e087
+      entity_id: switch.kitchendehumidifier
+      domain: switch
+    - type: turn_on
+      device_id: eeddeb7c0df4fc8ba5e7e0f1d34b1eba
+      entity_id: switch.diningroomdehumidifier
+      domain: switch
+  mode: single
+- id: '1652822427159'
+  alias: Bathroom Automation
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_motion_agl04_iaszone
+    alias: Movement detected
+    to: 'on'
+  - type: opened
+    platform: device
+    device_id: 06bbe71fbeda062d4c873167f88495c4
+    entity_id: binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+    domain: binary_sensor
+  condition: []
+  action:
+  - if:
+    - condition: time
+      after: input_datetime.bathroom_night_start
+      before: input_datetime.bathroom_night_end
+    then:
+    - service: scene.turn_on
+      target:
+        entity_id: scene.bathroom_night_toilet_and_sink_lights_only_warm_white_50_brightness
+      data: {}
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - binary_sensor.lumi_lumi_motion_agl04_iaszone
+        to: 'off'
+        for:
+          hours: 0
+          minutes: 5
+          seconds: 0
+    - service: scene.turn_on
+      target:
+        entity_id: scene.reset_bathroom_lights_lights_off
+      data: {}
+    - stop:
+    else:
+    - if:
+      - condition: state
+        entity_id: sensor.bathroom_light_level_below_threshold
+        for:
+          hours: 0
+          minutes: 1
+          seconds: 0
+        state: 'True'
+      then:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.reset_bathroom_lights_lights_on
+        data: {}
+      else:
+      - if:
+        - condition: state
+          entity_id: input_boolean.bathroom_temporary_override
+          state: 'off'
+        then:
+        - service: scene.turn_on
+          target:
+            entity_id: scene.reset_bathroom_lights_lights_off
+          data: {}
+        else:
+        - service: input_boolean.turn_off
+          data: {}
+          target:
+            entity_id: input_boolean.bathroom_temporary_override
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - binary_sensor.lumi_lumi_motion_agl04_iaszone
+        for:
+          hours: 0
+          minutes: 5
+          seconds: 0
+        to: 'off'
+    - if:
+      - condition: state
+        entity_id: input_boolean.bathroom_temporary_override
+        state: 'off'
+      then:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.reset_bathroom_lights_lights_off
+        data: {}
+      else:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.bathroom_temporary_override
+    - stop:
+  mode: restart
+- id: '1652902195686'
+  alias: Bathroom Lights Turned Off With Physical Switch
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.aqara_rtcgq13lm_occupancy
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.bathroom
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    state: unavailable
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: false
+      is_system: true
+      message: Someone turned the bathroom light switch off again!
+  mode: single
+- id: '1659437476662'
+  alias: Handle Bathroom Override Toggle
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.bathroom_temporary_override
+  - platform: event
+    event_type: timer.started
+    event_data:
+      entity_id: timer.bathroom_override
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.bathroom_override
+    id: bathroom.timer.finished
+  - platform: event
+    event_type: timer.cancelled
+    event_data:
+      entity_id: timer.bathroom_override
+    id: bathroom.timer.cancelled
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: input_boolean.bathroom_temporary_override
+      state: 'on'
+    - condition: not
+      conditions:
+      - condition: trigger
+        id: bathroom.timer.finished
+      - condition: trigger
+        id: bathroom.timer.cancelled
+    then:
+    - service: timer.start
+      data_template:
+        duration:
+          minutes: '{{ states(''input_number.bathroom_override_parameter'')|int }}'
+      target:
+        entity_id: timer.bathroom_override
+    else:
+    - service: timer.finish
+      data: {}
+      target:
+        entity_id: timer.bathroom_override
+  - if:
+    - condition: or
+      conditions:
+      - condition: trigger
+        id: bathroom.timer.finished
+      - condition: trigger
+        id: bathroom.timer.cancelled
+    then:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.bathroom_temporary_override
+    - if:
+      - type: is_no_motion
+        condition: device
+        device_id: 6d1f04a713e3d15eb1df4a170e6da93d
+        entity_id: binary_sensor.aqara_rtcgq13lm_occupancy
+        domain: binary_sensor
+      then:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.reset_bathroom_lights_lights_off
+        metadata: {}
+  mode: restart
+- id: '1659550336880'
+  alias: Start Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_button.start_timer
+  condition: []
+  action:
+  - service: timer.start
+    data: {}
+    target:
+      entity_id: timer.bathroom_override
+  mode: single
+- id: '1659550360716'
+  alias: Stop Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_button.stop_times
+  condition: []
+  action:
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.bathroom_override
+  mode: single
+- id: '1662203563568'
+  alias: Bathroom Door
+  description: 'Announce reminder to close door if do not disturb is off.
+
+
+    Announce still open after 5 minutes if do not disturb is off. Send mobile notification
+    if person is home.
+
+
+    Announce still open every 5 minutes if do not disturb is off. Send mobile notification
+    if person is home.'
+  trigger:
+  - type: opened
+    platform: device
+    device_id: 06bbe71fbeda062d4c873167f88495c4
+    entity_id: binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+    domain: binary_sensor
+  condition:
+  - type: is_not_occupied
+    condition: device
+    device_id: 13ff591684fab210e196fd1e5b72b37e
+    entity_id: binary_sensor.lumi_lumi_motion_agl04_occupancy
+    domain: binary_sensor
+  action:
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.bathroom_door_alerts
+    alias: Re-enable alerts
+  - if:
+    - condition: state
+      entity_id: binary_sensor.do_not_disturb
+      state: 'off'
+    then:
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 20
+        milliseconds: 0
+    - if:
+      - type: is_open
+        condition: device
+        device_id: 06bbe71fbeda062d4c873167f88495c4
+        entity_id: binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+        domain: binary_sensor
+      then:
+      - service: notify.alexa_media
+        data:
+          message: Please close the bathroom door when done.
+          target: media_player.landing_echo_dot
+          data:
+            type: tts
+        alias: Announce reminder to close bathroom door.
+  - repeat:
+      count: '1'
+      sequence:
+      - if:
+        - condition: and
+          conditions:
+          - type: is_open
+            condition: device
+            device_id: 06bbe71fbeda062d4c873167f88495c4
+            entity_id: binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+            domain: binary_sensor
+          - condition: state
+            entity_id: input_boolean.bathroom_door_alerts
+            state: 'on'
+            alias: Alerts have not been disabled
+        then:
+        - delay:
+            hours: 0
+            minutes: 5
+            seconds: 0
+            milliseconds: 0
+        - choose:
+          - conditions:
+            - condition: state
+              entity_id: binary_sensor.do_not_disturb
+              state: 'off'
+            sequence:
+            - service: notify.alexa_media
+              data:
+                message: The bathroom door is open.
+                target: media_player.landing_echo_dot
+                data:
+                  type: tts
+        - service: script.notification_handler
+          data_template:
+            is_critical: false
+            is_debug: false
+            is_system: false
+            message: The bathroom door is open.
+          alias: Send mobile notification if home
+        else:
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.bathroom_door_alerts
+          alias: Re-enable alerts
+        - stop: Door was closed.
+    alias: Announce/send first reminder at 5 minutes, if door is still open
+  - parallel:
+    - repeat:
+        while:
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: input_boolean.bathroom_door_alerts
+            state: 'on'
+            alias: Alerts have not been disabled
+          - type: is_open
+            condition: device
+            device_id: 06bbe71fbeda062d4c873167f88495c4
+            entity_id: binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+            domain: binary_sensor
+          alias: Door is open and alerts are enabled
+        sequence:
+        - delay:
+            hours: 0
+            minutes: 5
+            seconds: 0
+            milliseconds: 0
+        - if:
+          - condition: and
+            conditions:
+            - condition: state
+              entity_id: input_boolean.bathroom_door_alerts
+              state: 'off'
+            - type: is_open
+              condition: device
+              device_id: 06bbe71fbeda062d4c873167f88495c4
+              entity_id: binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+              domain: binary_sensor
+          then:
+          - choose:
+            - conditions:
+              - condition: state
+                entity_id: binary_sensor.do_not_disturb
+                state: 'off'
+              sequence:
+              - service: notify.alexa_media
+                data:
+                  message: '"The bathroom door has been left open for {{ ((as_timestamp(now())
+                    - as_timestamp(states.binary_sensor.door_contact_contact.last_changed))/60|round(0))|int
+                    }} minutes."'
+                  target: media_player.landing_echo_dot
+                  data:
+                    type: tts
+          - service: script.notification_handler
+            data_template:
+              is_critical: false
+              is_debug: false
+              is_system: false
+              message: '"The bathroom door has been left open for {{ ((as_timestamp(now())
+                - as_timestamp(states.binary_sensor.door_contact_contact.last_changed))/60|round(0))|int
+                }} minutes."'
+            alias: Send mobile notification if home
+          else:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.bathroom_door_alerts
+            alias: Re-enable alerts
+          - stop: Door was closed.
+    alias: Announce/send reminders every 5 minutes, if door is still open
+  mode: restart
+- id: '1642844969174'
+  alias: Octopus Go Off Peak
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.octopus_go_off_peak_start
+  condition: []
+  action:
+  - service: select.select_option
+    data:
+      option: Off Peak
+    target:
+      entity_id: select.octopus_go
+  - service: select.select_option
+    data:
+      option: offpeak
+    target:
+      entity_id: select.daily_energy_octopus
+  - service: input_number.set_value
+    data:
+      value: '{{ states(''input_number.octopus_go_off_peak'')|float + ( states(''input_number.electricity_standing_charge'')|float
+        / 24) }}'
+    target:
+      entity_id: input_number.octopus_go
+  - service: select.select_option
+    data:
+      option: Off Peak
+    target:
+      entity_id:
+      - select.washing_machine
+      - select.dishwasher
+      - select.tumble_dryer
+  mode: single
+- id: '1642845099522'
+  alias: Octopus Go Peak
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.octopus_go_off_peak_end
+  condition: []
+  action:
+  - service: select.select_option
+    data:
+      option: Peak
+    target:
+      entity_id: select.octopus_go
+  - service: select.select_option
+    data:
+      option: peak
+    target:
+      entity_id: select.daily_energy_octopus
+  - service: input_number.set_value
+    data:
+      value: '{{ states(''input_number.octopus_go_peak'')|float + ( states(''input_number.electricity_standing_charge'')|float
+        / 24) }}'
+    target:
+      entity_id: input_number.octopus_go
+  - service: select.select_option
+    data:
+      option: Peak
+    target:
+      entity_id:
+      - select.washing_machine
+      - select.dishwasher
+      - select.tumble_dryer
+  mode: single
+- id: '1653477172590'
+  alias: Update E.on Tariff Data
+  description: ''
+  trigger:
+  - platform: time
+    at: 00:00:00
+  condition: []
+  action:
+  - service: input_number.set_value
+    data:
+      value: 0.098
+    target:
+      entity_id: input_number.e_on_gas
+  - service: input_number.set_value
+    data:
+      value: 0.272
+    target:
+      entity_id: input_number.gas_standing_charge
+  mode: single
+- id: '1642204942069'
+  alias: Low Tyre Pressure
+  description: Send mobile notification when low tyre pressure is detected.
+  trigger:
+  - type: problem
+    platform: device
+    device_id: 814ef11cf14e3dcfcd1341bb5bf7cb98
+    entity_id: binary_sensor.bv70vdl_tire_pressure_all
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: true
+      is_debug: false
+      is_system: false
+      title: Kia eNiro
+      message: Low tyre pressure - please check the vehicle!
+  mode: single
+- id: '1642205140114'
+  alias: Plugged In, Not Charging
+  description: The vehicle is plugged in but is not charging
+  trigger:
+  - type: plugged_in
+    platform: device
+    device_id: 814ef11cf14e3dcfcd1341bb5bf7cb98
+    entity_id: binary_sensor.bv70vdl_ev_battery_plug
+    domain: binary_sensor
+  condition:
+  - type: is_not_charging
+    condition: device
+    device_id: 814ef11cf14e3dcfcd1341bb5bf7cb98
+    entity_id: binary_sensor.bv70vdl_ev_battery_charge
+    domain: binary_sensor
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: true
+      is_debug: false
+      is_system: false
+      title: Kia eNiro
+      message: The vehicle is plugged in but is not charging! Please check the vehicle!
+  mode: single
+- id: '1660126561130'
+  alias: Meaco Fan Remote Handler
+  description: Automation handler for Meaco Fan via Tasmota IR / MQTT
+  trigger:
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_power
+    id: Meaco_Fan_Power
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_speed
+    id: Meaco_Fan_Speed
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_speed_2
+    id: Meaco_Fan_Speed_2
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_eco_mode
+    id: Meaco_Fan_Eco
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_horizontal_oscillation
+    id: Meaco_Fan_Horizontal_Oscillation
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_vertical_oscillation
+    id: Meaco_Fan_Vertical_Oscillation
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_light
+    id: Meaco_Fan_Light
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_pre_off
+    id: Meaco_Fan_Pre_Off
+  - platform: state
+    entity_id:
+    - input_button.meaco_fan_pre_on
+    id: Meaco_Fan_Pre_On
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: Meaco_Fan_Power
+    then:
+    - service: mqtt.publish
+      data:
+        topic: cmnd/TasmotaIRBridge/IRsend
+        payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FE49B6","DataLSB":"0x807F926D","Repeat":0}'
+    else:
+    - if:
+      - condition: trigger
+        id: Meaco_Fan_Speed
+      then:
+      - service: mqtt.publish
+        data:
+          topic: cmnd/TasmotaIRBridge/IRsend
+          payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FE916E","DataLSB":"0x807F8976","Repeat":0}'
+      else:
+      - if:
+        - condition: trigger
+          id: Meaco_Fan_Speed_2
+        then:
+        - service: mqtt.publish
+          data:
+            topic: cmnd/TasmotaIRBridge/IRsend
+            payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FEF906","DataLSB":"0x807F9F60","Repeat":0}'
+        else:
+        - if:
+          - condition: trigger
+            id: Meaco_Fan_Eco
+          then:
+          - service: mqtt.publish
+            data:
+              topic: cmnd/TasmotaIRBridge/IRsend
+              payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FE817E","DataLSB":"0x807F817E","Repeat":0}'
+          else:
+          - if:
+            - condition: trigger
+              id: Meaco_Fan_Horizontal_Oscillation
+            then:
+            - service: mqtt.publish
+              data:
+                topic: cmnd/TasmotaIRBridge/IRsend
+                payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FEE11E","DataLSB":"0x807F8778","Repeat":0}'
+            else:
+            - if:
+              - condition: trigger
+                id: Meaco_Fan_Vertical_Oscillation
+              then:
+              - service: mqtt.publish
+                data:
+                  topic: cmnd/TasmotaIRBridge/IRsend
+                  payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FE51AE","DataLSB":"0x807F8A75","Repeat":0}'
+              else:
+              - if:
+                - condition: trigger
+                  id: Meaco_Fan_Light
+                then:
+                - service: mqtt.publish
+                  data:
+                    topic: cmnd/TasmotaIRBridge/IRsend
+                    payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FE7986","DataLSB":"0x807F9E61","Repeat":0}'
+                else:
+                - if:
+                  - condition: trigger
+                    id: Meaco_Fan_Pre_Off
+                  then:
+                  - service: mqtt.publish
+                    data:
+                      topic: cmnd/TasmotaIRBridge/IRsend
+                      payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FEC13E","DataLSB":"0x807F837C","Repeat":0}'
+                  else:
+                  - if:
+                    - condition: trigger
+                      id: Meaco_Fan_Pre_On
+                    then:
+                    - service: mqtt.publish
+                      data:
+                        topic: cmnd/TasmotaIRBridge/IRsend
+                        payload: '{"Protocol":"NEC","Bits":32,"Data":"0x1FE41BE","DataLSB":"0x807F827D","Repeat":0}'
+  mode: single
+- id: '1662325491348'
+  alias: Internet Connection Monitor
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.internet
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: WAN_DOWN
+  - platform: state
+    entity_id:
+    - binary_sensor.internet
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: WAN_UP
+  condition:
+  - condition: state
+    entity_id: input_boolean.do_not_disturb
+    state: 'off'
+    enabled: false
+  action:
+  - if:
+    - condition: trigger
+      id: WAN_DOWN
+    then:
+    - service: input_datetime.set_datetime
+      data:
+        datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      target:
+        entity_id: input_datetime.internet_down_time
+    - service: script.notification_handler
+      data_template:
+        is_critical: true
+        is_debug: false
+        is_system: true
+        title: Internet Connection Down
+        message: The primary internet connection was lost at {{ as_timestamp(states('input_datetime.internet_down_time'))|
+          timestamp_custom('%d/%m/%Y %H:%M') }}.
+    else:
+    - if:
+      - condition: trigger
+        id: WAN_UP
+      then:
+      - service: input_datetime.set_datetime
+        data:
+          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+        target:
+          entity_id: input_datetime.internet_restored_time
+      - service: script.notification_handler
+        data_template:
+          is_critical: true
+          is_debug: false
+          is_system: true
+          title: Internet Connection Restored
+          message: The primary internet connection was restored at {{ as_timestamp(states('input_datetime.internet_restored_time'))|
+            timestamp_custom('%d/%m/%Y %H:%M') }}. The internet was down for {{ ((state_attr('input_datetime.internet_restored_time','timestamp')-state_attr('input_datetime.internet_down_time','timestamp'))/60)|round(0)
+            }} {% if ((state_attr('input_datetime.internet_restored_time','timestamp')-state_attr('input_datetime.internet_down_time','timestamp'))/60)|round(0)
+            > 1 %} minutes {% else %} minute {% endif %}.
+  mode: single
+- id: '1648058728133'
+  alias: Automate Heating - Turn Off Heating Based On Outside Temperature
+  description: 'This automation will turn on the heating if the following are true;
+
+    * The outside temperature is greater than or equal to the threshold (default:
+    15)
+
+    * The time of day falls between the operating hours (default: 07:00-16:00)
+
+    * The heating is currently turned on'
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.ibs_th_10f3_temperature
+  condition:
+  - condition: state
+    entity_id: input_boolean.override_heating
+    state: 'off'
+  - condition: template
+    value_template: '{{ state_attr(''sensor.ibs_th_10f3_temperature'', ''temperature'')|float(2)
+      >= states(''input_number.heating_automation_setpoint'')|float(2) }}'
+    alias: Outdoor temperature goes above threshold
+  - condition: time
+    after: input_datetime.heating_automation_start_time
+    before: input_datetime.heating_automation_end_time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+    alias: Time is within automation window
+  - condition: state
+    entity_id: climate.home
+    state: heat
+    alias: The heating is currently on
+  action:
+  - service: evohome.set_system_mode
+    data:
+      mode: HeatingOff
+    alias: Set heating controller to 'Off'
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      title: Home Assistant
+      message: Heating turned off by climate control
+  mode: single
+- id: '1648058847418'
+  alias: Automate Heating - Turn On Heating Based On Outside Temperature and Occupancy/Proximity
+  description: 'This automation will turn off the heating if the following are true;
+
+    * The outside temperature is less than or equal to the threshold (default: 15)
+
+    * The time of day falls inside of the operating hours (default: 07:00-16:00)
+
+    * The heating is currently turned off
+
+    * Somebody is home
+
+
+    OR
+
+
+    * The heating is currently turned off
+
+    * The average household temperature is less than or equal to the threshold (default:
+    19)
+
+    * Somebody is home'
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.ibs_th_10f3_temperature
+  condition:
+  - condition: template
+    value_template: '{{ state_attr(''sensor.ibs_th_10f3_temperature'', ''temperature'')|float(2)
+      <= states(''input_number.heating_automation_setpoint'')|float(2) }}'
+  - condition: or
+    conditions:
+    - condition: and
+      conditions:
+      - condition: time
+        after: input_datetime.heating_automation_end_time
+        before: input_datetime.heating_automation_start_time
+      - condition: state
+        entity_id: climate.home
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.people_home
+          state: 'True'
+          for:
+            hours: 0
+            minutes: 1
+            seconds: 0
+          alias: Occupancy detected for 1 minute
+        - condition: numeric_state
+          entity_id: climate.home
+          below: '1'
+          alias: Proximity sensor detects occupancy
+        alias: Occupancy sensor(s) detect occupancy
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: climate.home
+        state: 'off'
+        alias: The heating is currently off
+      - condition: numeric_state
+        entity_id: sensor.average_household_temperature
+        below: input_number.heating_automation_minimum_internal_temperature
+        alias: Average household temperature is below the threshold
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.people_home
+          state: 'True'
+          for:
+            hours: 0
+            minutes: 1
+            seconds: 0
+          alias: Occupancy detected for 1 minute
+        - condition: numeric_state
+          entity_id: proximity.home
+          below: '1'
+          alias: Proximity sensor detects occupancy
+  action:
+  - service: evohome.reset_system
+    data: {}
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      title: Home Assistant
+      message: Heating turned on by climate control and/or proximity
+  mode: single
+- id: '1652456295222'
+  alias: Automate Heating - Turn Off Heating Based On Proximity
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: proximity.home
+    above: '2'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    alias: Proximity sensor detects no occupancy
+  - platform: state
+    entity_id:
+    - sensor.people_home
+    to: 'False'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    alias: No occupancy detected for 1 minute
+  condition:
+  - condition: state
+    entity_id: climate.home
+    state: 'off'
+    alias: No occupancy detected
+  - condition: state
+    entity_id: proximity.home
+    attribute: dir_of_travel
+    state: away_from
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    alias: Proximity sensor detects travel away from home for 1 minute
+  action:
+  - service: evohome.set_system_mode
+    data:
+      mode: HeatingOff
+    alias: Set heating controller to 'Off'
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      message: Heating turned off by proximity
+      title: Home Assistant
+  mode: single
+- id: '1652457169939'
+  alias: Automate Heating - Turn On Heating On When Travelling Back To House
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: proximity.home
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    below: '15'
+    alias: Proximity sensor detects travel within 15 miles of home
+  condition:
+  - condition: state
+    entity_id: proximity.home
+    attribute: dir_of_travel
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    state: towards
+    alias: Proximity sensor detects direction of travel towards home
+  - condition: or
+    conditions:
+    - condition: and
+      conditions:
+      - condition: time
+        after: input_datetime.heating_automation_end_time
+        before: input_datetime.heating_automation_start_time
+        alias: The time is outside of the automation threshold
+      - condition: state
+        entity_id: climate.home
+        state: 'off'
+        alias: The heating is off
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: climate.home
+        state: 'off'
+        alias: The heating is off
+      - condition: numeric_state
+        entity_id: sensor.average_household_temperature
+        below: input_number.heating_automation_minimum_internal_temperature
+        alias: The internal temperature is less than the threshold
+  action:
+  - service: evohome.reset_system
+    data: {}
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      message: Heating turned on by proximity
+      title: Home Assistant
+  mode: single
+- id: '1659712311617'
+  alias: Check / Alert EV Range
+  description: Check the range of the car, if the car is below the threshold and is
+    not charging, send a mobile notification.
+  trigger:
+  - platform: time_pattern
+    hours: /6
+  condition:
+  - condition: state
+    entity_id: binary_sensor.do_not_disturb
+    state: 'off'
+  action:
+  - service: script.car_ev_battery_low
+    data: {}
+  mode: single
+- id: '1659740704133'
+  alias: Shutdown Synology NAS
+  description: Shutdown the Synology NAS at 11pm if there are no active streams from
+    Channels DVR or Plex.
+  trigger:
+  - platform: time
+    at: input_datetime.synology_nas_shut_down_time
+  condition:
+  - condition: state
+    entity_id: switch.synology_ds2419_ii
+    state: 'on'
+  action:
+  - repeat:
+      while:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.channels_apple_tv_living_room
+          state: playing
+        - condition: state
+          entity_id: media_player.channels_apple_tv_dining_room
+          state: playing
+        - condition: state
+          entity_id: media_player.channels_apple_tv_kitchen
+          state: playing
+        - condition: numeric_state
+          entity_id: sensor.plex_synology
+          above: '0'
+        - condition: state
+          entity_id: sensor.sabnzbd_status
+          state: Downloading
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.synology_ds2419_ii
+  mode: single
+- id: '1659742903099'
+  alias: Start Synology NAS
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.synology_nas_start_time
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: false
+      is_system: true
+      message: Starting NAS
+    enabled: false
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.synology_ds2419_ii
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - sensor.hpds_temperature_11
+      from: unavailable
+    continue_on_timeout: true
+    timeout:
+      minutes: 5
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: false
+      is_system: true
+      message: NAS Started - Restarting Plex
+    enabled: false
+  - service: script.restart_plex
+    data: {}
+  mode: single
+- id: '1660381160136'
+  alias: Reset Landing Light
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.landing_light
+    from: unavailable
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 100
+    target:
+      entity_id: light.landing_light
+  mode: single
+- id: '1660409561761'
+  alias: Reset Bathroom Lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.ikea_tradfri_led2005r5_1
+    - light.ikea_tradfri_led2005r5_2
+    - light.ikea_tradfri_led2005r5_3
+    - light.ikea_tradfri_led2005r5_4
+    - light.ikea_tradfri_led2005r5_5
+    from: unavailable
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 100
+    target:
+      entity_id:
+      - light.ikea_tradfri_led2005r5_1
+      - light.ikea_tradfri_led2005r5_2
+      - light.ikea_tradfri_led2005r5_3
+      - light.ikea_tradfri_led2005r5_4
+      - light.ikea_tradfri_led2005r5_5
+  mode: single
+- id: '1660409604264'
+  alias: Reset Kids Bedroom Light
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.kids_bedroom_light
+    from: unavailable
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 100
+    target:
+      entity_id: light.kids_bedroom_light
+  mode: single
+- id: '1660409638841'
+  alias: Reset Master Bedroom Bedroom Light
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.master_bedroom_light_light
+    from: unavailable
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 100
+    target:
+      entity_id: light.master_bedroom_light_light
+  mode: single
+- id: '1659781024207'
+  alias: Handle Automations on Home Assistant Start
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  condition: []
+  action:
+  - service: script.turn_off_bathroom_lights_if_on_for_extended_period
+    data: {}
+  mode: single
+- id: '1659783652299'
+  alias: Turn Off Lights Left On For Extended Period
+  description: ''
+  trigger:
+  - platform: time_pattern
+    hours: /1
+  condition: []
+  action:
+  - parallel:
+    - service: script.turn_off_bathroom_lights_if_on_for_extended_period
+      data: {}
+    - service: script.turn_off_kids_bedroom_light_if_on_for_extended_period
+      data: {}
+  mode: single
+- id: '1662802346790'
+  alias: Test Alexa Actionable Notifications
+  description: ''
+  trigger:
+  - platform: event
+    event_type: alexa_actionable_notification
+    event_data:
+      event_id: actionable_notification_turn_thing_off
+      event_response_type: ResponseYes
+    id: turn_thing_off
+  - platform: event
+    event_type: alexa_actionable_notification
+    event_data:
+      event_id: actionable_notification_turn_thing_on
+      event_response_type: ResponseYes
+    id: turn_thing_on
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: turn_thing_off
+    then:
+    - type: turn_off
+      device_id: eeddeb7c0df4fc8ba5e7e0f1d34b1eba
+      entity_id: switch.diningroomdehumidifier
+      domain: switch
+    else:
+    - if:
+      - condition: trigger
+        id: turn_thing_on
+      then:
+      - type: turn_on
+        device_id: eeddeb7c0df4fc8ba5e7e0f1d34b1eba
+        entity_id: switch.diningroomdehumidifier
+        domain: switch
+  mode: single
+- id: '1660170841995'
+  alias: Kitchen Echo Dot Timer Handler
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.kitchen_echo_dot_next_timer
+    from: unavailable
+    id: kitchen_timer_started
+  - platform: state
+    entity_id:
+    - sensor.kitchen_echo_dot_next_timer
+    id: kitchen_timer_cancelled
+    to: unavailable
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      event_data:
+        entity_id: timer.alexa_timer_kitchen
+    id: internal_kitchen_timer_finished
+  - platform: event
+    event_type: timer.cancelled
+    event_data:
+      event_data:
+        entity_id: timer.alexa_timer_kitchen
+    id: internal_kitchen_timer_cancelled
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: kitchen_timer_started
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: false
+        is_debug: false
+        is_system: false
+        message: A {{ ((as_timestamp(states('sensor.kitchen_echo_dot_next_timer'))
+          - as_timestamp(now()))/60)|round(0) }} minute timer has been started in
+          the kitchen.
+    - service: timer.start
+      data:
+        duration:
+          minutes: '{{ ((as_timestamp(states(''sensor.kitchen_echo_dot_next_timer''))
+            - as_timestamp(now()))/60)|round(0) }}'
+      target:
+        entity_id: timer.alexa_timer_kitchen
+    else:
+    - if:
+      - condition: trigger
+        id: kitchen_timer_cancelled
+      then:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: false
+          message: The kitchen timer has finished/been cancelled.
+      - service: timer.cancel
+        target:
+          entity_id: timer.alexa_timer_kitchen
+        data: {}
+    - if:
+      - condition: trigger
+        id: internal_kitchen_timer_finished
+      then:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: false
+          message: Timer Finished
+    - if:
+      - condition: trigger
+        id: internal_kitchen_timer_cancelled
+      then:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: false
+          message: Timer Cancelled
+  mode: single
+- id: '1649586908882'
+  alias: Notify Tumble Dryer Finished
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.dryer_state_machine
+    to: job_completed
+    from: job_ongoing
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: false
+      is_system: false
+      message: The tumble dryer has finished.
+  mode: single
+- id: '1649710773908'
+  alias: Notify Washing Machine Finished
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.washing_machine_state_machine
+    to: job_completed
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    from: job_ongoing
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: false
+      is_system: false
+      message: Washing machine has finished!
+  mode: single
+- id: '1649711525841'
+  alias: Notify Dishwasher Finished
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.dishwasher_state_machine
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    to: job_completed
+    from: job_ongoing
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: false
+      is_system: false
+      message: Dishwasher has finished!
+  mode: single
+- id: '1659661507139'
+  alias: Default turn-on brightness and color temperature for light(s)
+  description: ''
+  use_blueprint:
+    path: Noblewolf/default-turn-on-brightness-color-temperature-for-lights.yaml
+    input:
+      target_lights: light.ikea_tradfri_led2035g10
+      light_color_temperature: 154
+- id: '1643466109155'
+  alias: Offline detection for Z2M devices with last_seen
+  description: ''
+  use_blueprint:
+    path: Mr-Groch/offline-notification-for-sensors-with-last_seen.yaml
+    input:
+      actions:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: true
+          message: Zigbee device {{sensors}} offline
+      hours: 24
+- id: '1662883842115'
+  alias: Washing Machine
+  description: Monitor the state of the washing machine smart plug to determine the
+    running state.
+  use_blueprint:
+    path: leofabri/appliance-status-monitor.yaml
+    input:
+      appliance_socket: switch.washingmachine
+      appliance_power_sensor: sensor.washingmachine_energy_power
+      appliance_state_machine: input_select.washing_machine_state_machine
+      appliance_job_cycle: input_boolean.washing_machine_job_cycle
+      delayed_job_completion_timer: timer.washing_machine_delayed_job_completion_timer
+      automation_self_trigger: input_boolean.washing_machine_automation_self_trigger
+      delayed_job_completion_duration: 60
+      appliance_starting_power_threshold: 10
+      appliance_finishing_power_threshold: 5
+- id: '1662884201766'
+  alias: Dishwasher
+  description: Monitor the state of the washing machine smart plug to determine the
+    running state.
+  use_blueprint:
+    path: leofabri/appliance-status-monitor.yaml
+    input:
+      appliance_socket: switch.dishwasher
+      appliance_power_sensor: sensor.dishwasher_energy_power
+      appliance_starting_power_threshold: 20
+      appliance_finishing_power_threshold: 15
+      appliance_suspended_sensor: []
+      appliance_state_machine: input_select.dishwasher_state_machine
+      appliance_job_cycle: input_boolean.dishwasher_job_cycle
+      delayed_job_completion_timer: timer.dishwasher_delayed_job_completion_timer
+      automation_self_trigger: input_boolean.dishwasher_automation_self_trigger
+      delayed_job_completion_duration: 60
+- id: '1662884366995'
+  alias: Tumble Dryer
+  description: Monitor the state of the tumble dryer smart plug to determine the running
+    state.
+  use_blueprint:
+    path: leofabri/appliance-status-monitor.yaml
+    input:
+      appliance_socket: switch.tasmota_6
+      appliance_power_sensor: sensor.tasmota_energy_power
+      appliance_starting_power_threshold: 8
+      appliance_finishing_power_threshold: 6
+      appliance_suspended_sensor: []
+      appliance_state_machine: input_select.dryer_state_machine
+      appliance_job_cycle: input_boolean.dryer_automation_self_trigger
+      delayed_job_completion_timer: timer.dryer_delayed_job_completion_timer
+      automation_self_trigger: input_boolean.dryer_automation_self_trigger
+      delayed_job_completion_duration: 1
+- id: '1663151512612'
+  alias: Warn UPS Battery Fail
+  description: Warn that the UPS battery is failing.
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.ups_status_data
+    to: ALARM OL RB
+  - platform: state
+    entity_id:
+    - sensor.ups_status_data
+    to: ALARM OL CHRG RB
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: true
+      is_debug: false
+      is_system: true
+      message: The UPS battery is failing. Please order a new battery!
+  - service: notify.persistent_notification
+    data:
+      message: The UPS battery is failing. Please order a new battery!
+  mode: single
+- id: '1663790375453'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.override_heating
+    id: heating.toggle.on
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id:
+    - input_boolean.override_heating
+    id: heating.toggle.off
+    from: 'on'
+    to: 'off'
+  - platform: event
+    event_type: timer.started
+    event_data:
+      entity_id: timer.heating_override
+    id: heating.timer.started
+    enabled: false
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.heating_override
+    id: heating.timer.finished
+  - platform: event
+    event_type: timer.cancelled
+    event_data:
+      entity_id: timer.heating_override
+    id: heating.timer.cancelled
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: input_boolean.override_heating
+      state: 'on'
+    - condition: not
+      conditions:
+      - condition: trigger
+        id: heating.timer.finished
+      - condition: trigger
+        id: heating.timer.cancelled
+      - condition: trigger
+        id: heating.toggle.off
+    then:
+    - service: timer.start
+      data_template:
+        duration:
+          hours: 2
+      target:
+        entity_id: timer.heating_override
+    - service: script.notification_handler
+      data_template:
+        is_critical: false
+        is_debug: false
+        is_system: false
+        message: Heating override enabled for 2 hours.
+    - service: evohome.set_system_mode
+      data:
+        mode: Auto
+    else:
+    - service: timer.finish
+      data: {}
+      target:
+        entity_id: timer.heating_override
+  - if:
+    - condition: or
+      conditions:
+      - condition: trigger
+        id: heating.timer.finished
+      - condition: trigger
+        id: heating.timer.cancelled
+      - condition: trigger
+        id: heating.toggle.off
+    then:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.override_heating
+    - service: script.notification_handler
+      data_template:
+        is_critical: false
+        is_debug: false
+        is_system: false
+        message: Heating override ended.
+  mode: restart
+- id: '1664061109754'
+  alias: washer has finished
+  description: ''
+  use_blueprint:
+    path: sbyx/notify-or-do-something-when-an-appliance-like-a-dishwasher-or-washing-machine-finishes.yaml
+    input:
+      power_sensor: sensor.washingmachine_energy_power
+      actions:
+      - service: notify.mobile_app_myphone
+        data:
+          message: Washer Done
+      pre_actions:
+      - service: notify.mobile_app_myphone
+        data:
+          message: Washer started
+      finishing_hysteresis: 1
+      finishing_threshold: 4
+- id: '1666456945222'
+  alias: Solar Trigger Output Source Change
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.solar_output_source_priority
+  condition: []
+  action:
+  - service: mqtt.publish
+    data:
+      topic: homeassistant/sensor/inverter
+      payload: "{% if is_state(\"input_select.solar_output_source_priority\", \"POP00
+        (Utility first)\") %}\n  POP00\n{% elif is_state(\"input_select.solar_output_source_priority\",
+        \"POP01 (Solar first)\") %}\n  POP01\n{% elif is_state(\"input_select.solar_output_source_priority\",
+        \"POP02 (SBU)\") %}\n  POP02\n{% endif %}\n"
+  mode: single
+- id: '1666457147127'
+  alias: Solar Trigger Charge Priority Change
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.solar_charger_priority
+  condition: []
+  action:
+  - service: mqtt.publish
+    data:
+      topic: homeassistant/sensor/inverter
+      payload: "{% if is_state(\"input_select.solar_charger_priority\", \"PCP00 (Utility
+        first)\") %}\n  PCP00\n{% elif is_state(\"input_select.solar_charger_priority\",
+        \"PCP01 (Solar first)\") %}\n  PCP01\n{% elif is_state(\"input_select.solar_charger_priority\",
+        \"PCP02 (Solar and utility)\") %}\n  PCP02\n{% elif is_state(\"input_select.solar_charger_priority\",
+        \"PCP03 (Solar only)\") %}\n  PCP03\n{% endif %}\n"
+  mode: single
+- id: '1670104706285'
+  alias: Christmas Lights
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: 0
+    id: sunrise
+  - platform: sun
+    event: sunset
+    offset: 0
+    id: sunset
+  - platform: time
+    at: '23:00:00'
+    id: christmaslightsoff
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: sunrise
+    then:
+    - type: turn_on
+      device_id: 54167e25f784cea84dbf3699a277e260
+      entity_id: light.candelabra
+      domain: light
+    - type: turn_on
+      device_id: 9d296a1490273b3d1f63b1f8055dda92
+      entity_id: light.twinkly_69dced
+      domain: light
+    alias: Turn on indoor Christmas lights at sunrise
+  - if:
+    - condition: trigger
+      id: sunset
+    then:
+    - type: turn_on
+      device_id: 925d9b89952a34621a5660622e2d3ab1
+      entity_id: light.outside_christmas_lights
+      domain: light
+    alias: Turn on outdoor Christmas lights at sunset
+  - if:
+    - condition: trigger
+      id: christmaslightsoff
+    then:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.all_christmas_lights
+    alias: Turn off all Christmas lights at 11pm
+  mode: single
+- id: '1672574835692'
+  alias: Heat Car
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.heater
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.mobile_app_myphone
+    data:
+      message: Car climate enabled for 10 minutes
+  - service: kia_uvo.start_climate
+    data:
+      device_id: 814ef11cf14e3dcfcd1341bb5bf7cb98
+      duration: 10
+      temperature: 22
+      heating: '1'
+      flseat: '8'
+      frseat: '8'
+  - delay:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.heater
+  mode: single
+- id: '1672680576968'
+  alias: IKEA Tradfri E1743 On Off Switch Handler
+  description: Handler for IKEA Tradfri E1743 On Off Switch
+  trigger:
+  - device_id: f8fb2ca1130dadb5200218a5ff048811
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+    id: bathroom_on
+  - device_id: f8fb2ca1130dadb5200218a5ff048811
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_off
+    id: bathroom_off
+  condition: []
+  action:
+  - if:
+    - condition: or
+      conditions:
+      - condition: trigger
+        id: bathroom_on
+      - condition: template
+        value_template: '{{ ikea_switch_on==true }}'
+    then:
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: input_boolean.bathroom_temporary_override
+    - service: timer.start
+      data: {}
+      target:
+        entity_id: timer.bathroom_override
+    - if:
+      - condition: and
+        conditions:
+        - condition: state
+          state: 'off'
+          entity_id: light.all_master_bathroom_lights
+        - condition: time
+          after: input_datetime.bathroom_night_start
+          before: input_datetime.bathroom_night_end
+      then:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.bathroom_night_toilet_and_sink_lights_only_warm_white_50_brightness
+        metadata: {}
+      else:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.reset_bathroom_lights_lights_on
+        metadata: {}
+    - choose:
+      - conditions:
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: light.all_master_bathroom_lights
+            state: 'off'
+          - condition: time
+            after: input_datetime.bathroom_night_start
+            before: input_datetime.bathroom_night_end
+        sequence:
+        - service: scene.turn_on
+          target:
+            entity_id: scene.bathroom_night_toilet_and_sink_lights_only_warm_white_50_brightness
+          metadata: {}
+      - conditions:
+        - condition: state
+          entity_id: light.all_master_bathroom_lights
+          state: 'on'
+        sequence: []
+      enabled: false
+  - if:
+    - condition: or
+      conditions:
+      - condition: trigger
+        id: bathroom_off
+      - condition: template
+        value_template: '{{ ikea_switch_off==true }}'
+    then:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.bathroom_temporary_override
+    - service: scene.turn_on
+      target:
+        entity_id: scene.reset_bathroom_lights_lights_off
+      metadata: {}
+- id: '1672681347783'
+  alias: Kids bedroom 4-way Switch Handler
+  description: Handler for Kids bedroom 4-way Switch
+  trigger:
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+    id: Kids bedroom 4-way Switch "1_single" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_1
+    id: Kids bedroom 4-way Switch "1_double" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_1
+    id: Kids bedroom 4-way Switch "1_hold" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_2
+    id: Kids bedroom 4-way Switch "2_single" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_2
+    id: Kids bedroom 4-way Switch "2_double" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_2
+    id: Kids bedroom 4-way Switch "2_hold" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_3
+    id: Kids bedroom 4-way Switch "3_single" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_3
+    id: Kids bedroom 4-way Switch "3_double" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_3
+    id: Kids bedroom 4-way Switch "3_hold" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_4
+    id: Kids bedroom 4-way Switch "4_single" action
+  - device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_4
+    id: Kids bedroom 4-way Switch "4_double" action
+  - platform: device
+    device_id: 33d593b9a5375f714ad2ad6a93dbb1f8
+    domain: button
+    entity_id: button.kids_bedroom_4_way_switch_identify
+    type: pressed
+    id: Kids bedroom 4-way Switch "4_hold" action
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "1_single" action
+    then:
+    - service: light.toggle
+      data:
+        brightness_pct: 100
+        transition: 1
+      target:
+        entity_id: light.kids_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "1_double" action
+    then:
+    - service: light.toggle
+      data:
+        brightness_pct: 50
+        transition: 1
+      target:
+        entity_id: light.kids_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "1_hold" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.kids_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "2_single" action
+    then:
+    - service: light.toggle
+      data:
+        color_name: white
+        brightness_pct: 100
+        transition: 1
+      target:
+        entity_id: light.signify_netherlands_b_v_llc013_huelight
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "2_double" action
+    then:
+    - service: light.toggle
+      data:
+        brightness_pct: 50
+        color_name: white
+        transition: 1
+      target:
+        entity_id: light.signify_netherlands_b_v_llc013_huelight
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "2_hold" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.signify_netherlands_b_v_llc013_huelight
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "3_single" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.kids_bedroom_light_light
+    - service: light.turn_on
+      data:
+        brightness_pct: 20
+        color_name: violet
+        transition: 1
+      target:
+        entity_id: light.signify_netherlands_b_v_llc013_huelight
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "3_double" action
+    then:
+    - service: light.toggle
+      target:
+        entity_id: light.kids_led_lights
+      data:
+        brightness_pct: 50
+    enabled: false
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "3_hold" action
+    then:
+    - service: light.turn_off
+      target:
+        entity_id: light.kids_led_lights
+      data: {}
+    enabled: false
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "4_single" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.all_kids_bedroom_lights
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "4_double" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.all_kids_bedroom_lights
+  - if:
+    - condition: trigger
+      id: Kids bedroom 4-way Switch "4_hold" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.all_kids_bedroom_lights
+- id: '1672682220334'
+  alias: Master bedroom 4-way Switch Handler
+  description: Handler for Master bedroom 4-way Switch
+  trigger:
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+    id: Master bedroom 4-way Switch "1_single" action
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_1
+    id: Master bedroom 4-way Switch "1_double" action
+    enabled: true
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_1
+    id: Master bedroom 4-way Switch "1_hold" action
+    enabled: true
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_2
+    id: Master bedroom 4-way Switch "2_single" action
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_2
+    id: Master bedroom 4-way Switch "2_double" action
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_2
+    id: Master bedroom 4-way Switch "2_hold" action
+    enabled: true
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_3
+    id: Master bedroom 4-way Switch "3_single" action
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_3
+    id: Master bedroom 4-way Switch "3_double" action
+    enabled: true
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_3
+    id: Master bedroom 4-way Switch "3_hold" action
+    enabled: true
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_4
+    id: Master bedroom 4-way Switch "4_single" action
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_4
+    id: Master bedroom 4-way Switch "4_double" action
+    enabled: true
+  - device_id: caba5eff8e8af6e4295cfba68159c656
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_4
+    id: Master bedroom 4-way Switch "4_hold" action
+    enabled: true
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "1_single" action
+    then:
+    - service: light.toggle
+      data:
+        brightness_pct: 100
+        transition: 1
+      target:
+        entity_id: light.master_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "1_double" action
+    then:
+    - service: light.toggle
+      data:
+        brightness_pct: 50
+        transition: 1
+      target:
+        entity_id: light.master_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "1_hold" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.master_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "2_single" action
+    then:
+    - service: light.toggle
+      data:
+        transition: 1
+        brightness_pct: 100
+      target:
+        entity_id: light.bed_light_huelight
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "2_double" action
+    then:
+    - service: light.toggle
+      data:
+        transition: 0
+        brightness_pct: 50
+      target:
+        entity_id: light.bed_light_huelight
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "2_hold" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.bed_light_huelight
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "3_single" action
+    then:
+    - service: light.toggle
+      data:
+        color_temp: 500
+        brightness_pct: 50
+        transition: 1
+      target:
+        entity_id: light.bed_light_huelight
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.master_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "3_double" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.master_bedroom_light_light
+    - service: light.toggle
+      data:
+        brightness_pct: 25
+        transition: 1
+        color_temp: 500
+      target:
+        entity_id: light.bed_light_huelight
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "3_hold" action
+    then:
+    - service: light.toggle
+      target:
+        device_id: 9f24909fc3d2d24894d3855bb9905d4a
+      data:
+        brightness_pct: 25
+    - service: light.toggle
+      data:
+        brightness_pct: 25
+        color_name: white
+      target:
+        device_id: 5c6fe9297a29501c1b5cbe311065dd39
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "4_single" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.all_master_bedroom_lights
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "4_double" action
+    then: []
+  - if:
+    - condition: trigger
+      id: Master bedroom 4-way Switch "4_hold" action
+    then: []
+  mode: single
+- id: '1672738881426'
+  alias: USB Dongle Alert Handler
+  description: Send notifications if USB dongles are unplugged
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.bluetooth_radio_2
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: ASUS USB-BT500
+  - platform: state
+    entity_id:
+    - binary_sensor.bluetooth_radio
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: Bluetooth Radio
+  - platform: state
+    entity_id:
+    - binary_sensor.ramses_rf
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: Ramses RF
+  - platform: state
+    entity_id:
+    - binary_sensor.rfxtrx433
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: RFXtrx433
+  - platform: state
+    entity_id:
+    - binary_sensor.rtl433_dongle
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: RTL433 Dongle
+  - platform: state
+    entity_id:
+    - binary_sensor.sonoff_zigbee_3_0_usb_dongle_plus
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: Sonoff Zigbee 3.0 USB Dongle Plus
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: ASUS USB-BT500
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: false
+        is_debug: false
+        is_system: true
+        title: Home Assistant
+        message: ASUS USB-BT500 USB stick is no longer present!
+  - if:
+    - condition: trigger
+      id: Bluetooth Radio
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: true
+        is_debug: false
+        is_system: true
+        title: Home Assistant
+        message: Bluetooth USB stick is no longer present!
+  - if:
+    - condition: trigger
+      id: Ramses RF
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: true
+        is_debug: false
+        is_system: true
+        title: Home Assistant
+        message: Ramses RF (EvoHome) USB stick is no longer present!
+  - if:
+    - condition: trigger
+      id: RFXtrx433
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: false
+        is_debug: false
+        is_system: true
+        title: Home Assistant
+        message: RFXtrx433 USB stick is no longer present!
+  - if:
+    - condition: trigger
+      id: RTL433 Dongle
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: true
+        is_debug: false
+        is_system: true
+        title: Home Assistant
+        message: RTL433 USB stick is no longer present!
+  - if:
+    - condition: trigger
+      id: Sonoff Zigbee 3.0 USB Dongle Plus
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: true
+        is_debug: false
+        is_system: true
+        title: Home Assistant
+        message: Zigbee USB stick is no longer present! Most lights and sensors will
+          not work until this is resolved!
+  mode: single
+- id: '1672740004063'
+  alias: Philips Hue Dimmer Handler
+  description: Handler for Philips Hue Dimmer switch/remote
+  trigger:
+  - device_id: cd63a92d4200b7767391b4421c12bdec
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+    id: Philips Hue Dimmer "on_press" action
+  - device_id: cd63a92d4200b7767391b4421c12bdec
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: turn_on
+    id: Philips Hue Dimmer "double on_press" action
+  - device_id: cd63a92d4200b7767391b4421c12bdec
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_off
+    id: Philips Hue Dimmer "off_press" action
+  - device_id: cd63a92d4200b7767391b4421c12bdec
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: turn_off
+    id: Philips Hue Dimmer "double off_press" action
+  - device_id: cd63a92d4200b7767391b4421c12bdec
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: dim_up
+    id: Philips Hue Dimmer "up_press" action
+  - device_id: cd63a92d4200b7767391b4421c12bdec
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: dim_down
+    id: Philips Hue Dimmer "down_press" action
+  - device_id: cd63a92d4200b7767391b4421c12bdec
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: turn_off
+    id: Philips Hue Dimmer "off_hold" action
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: Philips Hue Dimmer "on_press" action
+    then:
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.do_not_disturb
+          state: 'on'
+        sequence:
+        - service: light.turn_on
+          data:
+            transition: 1
+            brightness_pct: 20
+          target:
+            entity_id: light.master_bedroom_light_light
+      default:
+      - service: light.turn_on
+        data:
+          transition: 1
+          brightness_pct: 100
+        target:
+          entity_id: light.master_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Philips Hue Dimmer "double on_press" action
+    then:
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.do_not_disturb
+          state: 'on'
+        sequence:
+        - service: light.turn_on
+          data:
+            transition: 1
+            color_temp: 500
+            brightness_pct: 20
+          target:
+            entity_id: light.bed_light_huelight
+      default:
+      - service: light.turn_on
+        data:
+          transition: 1
+          color_temp: 153
+          brightness_pct: 20
+        target:
+          entity_id: light.bed_light_huelight
+      alias: Set brightness to 20% at night, otherwise 100%
+  - if:
+    - condition: trigger
+      id: Philips Hue Dimmer "off_press" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.master_bedroom_light_light
+  - if:
+    - condition: trigger
+      id: Philips Hue Dimmer "double off_press" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id: light.bed_light_huelight
+  - if:
+    - condition: trigger
+      id: Philips Hue Dimmer "up_press" action
+    then:
+    - choose:
+      - conditions:
+        - condition: and
+          conditions:
+          - condition: device
+            type: is_on
+            device_id: b0972a48b3f209015f387e0e8a36c474
+            entity_id: light.master_bedroom_light_light
+            domain: light
+          - condition: device
+            type: is_off
+            device_id: 3370d04b7ff80f8083990d294b3bd01b
+            entity_id: light.bed_light_huelight
+            domain: light
+        sequence:
+        - device_id: b0972a48b3f209015f387e0e8a36c474
+          domain: light
+          entity_id: light.master_bedroom_light_light
+          type: brightness_increase
+      alias: Master Bedroom Light On
+    - choose:
+      - conditions:
+        - condition: and
+          conditions:
+          - condition: device
+            type: is_on
+            device_id: 3370d04b7ff80f8083990d294b3bd01b
+            entity_id: light.bed_light_huelight
+            domain: light
+          - condition: device
+            type: is_off
+            device_id: b0972a48b3f209015f387e0e8a36c474
+            entity_id: light.master_bedroom_light_light
+            domain: light
+        sequence:
+        - device_id: 3370d04b7ff80f8083990d294b3bd01b
+          domain: light
+          entity_id: light.bed_light_huelight
+          type: brightness_increase
+      alias: Master Bedroom Bed Light On
+    - choose:
+      - conditions:
+        - condition: and
+          conditions:
+          - condition: device
+            type: is_on
+            device_id: 3370d04b7ff80f8083990d294b3bd01b
+            entity_id: light.bed_light_huelight
+            domain: light
+          - condition: device
+            type: is_on
+            device_id: b0972a48b3f209015f387e0e8a36c474
+            entity_id: light.master_bedroom_light_light
+            domain: light
+        sequence:
+        - device_id: b0972a48b3f209015f387e0e8a36c474
+          domain: light
+          entity_id: light.master_bedroom_light_light
+          type: brightness_increase
+        - device_id: 3370d04b7ff80f8083990d294b3bd01b
+          domain: light
+          entity_id: light.bed_light_huelight
+          type: brightness_increase
+      alias: Master Bedroom All Lights On
+  - if:
+    - condition: trigger
+      id: Philips Hue Dimmer "down_press" action
+    then:
+    - device_id: b0972a48b3f209015f387e0e8a36c474
+      domain: light
+      entity_id: light.master_bedroom_light_light
+      type: brightness_decrease
+      enabled: false
+    - choose:
+      - conditions:
+        - condition: and
+          conditions:
+          - condition: device
+            type: is_on
+            device_id: b0972a48b3f209015f387e0e8a36c474
+            entity_id: light.master_bedroom_light_light
+            domain: light
+          - condition: device
+            type: is_off
+            device_id: 3370d04b7ff80f8083990d294b3bd01b
+            entity_id: light.bed_light_huelight
+            domain: light
+        sequence:
+        - device_id: b0972a48b3f209015f387e0e8a36c474
+          domain: light
+          entity_id: light.master_bedroom_light_light
+          type: brightness_decrease
+      alias: Master Bedroom Light On
+    - choose:
+      - conditions:
+        - condition: and
+          conditions:
+          - condition: device
+            type: is_on
+            device_id: 3370d04b7ff80f8083990d294b3bd01b
+            entity_id: light.bed_light_huelight
+            domain: light
+          - condition: device
+            type: is_off
+            device_id: b0972a48b3f209015f387e0e8a36c474
+            entity_id: light.master_bedroom_light_light
+            domain: light
+        sequence:
+        - device_id: 3370d04b7ff80f8083990d294b3bd01b
+          domain: light
+          entity_id: light.bed_light_huelight
+          type: brightness_decrease
+      alias: Master Bedroom Bed Light On
+    - choose:
+      - conditions:
+        - condition: and
+          conditions:
+          - condition: device
+            type: is_on
+            device_id: 3370d04b7ff80f8083990d294b3bd01b
+            entity_id: light.bed_light_huelight
+            domain: light
+          - condition: device
+            type: is_on
+            device_id: b0972a48b3f209015f387e0e8a36c474
+            entity_id: light.master_bedroom_light_light
+            domain: light
+        sequence:
+        - device_id: b0972a48b3f209015f387e0e8a36c474
+          domain: light
+          entity_id: light.master_bedroom_light_light
+          type: brightness_decrease
+        - device_id: 3370d04b7ff80f8083990d294b3bd01b
+          domain: light
+          entity_id: light.bed_light_huelight
+          type: brightness_decrease
+      alias: Master Bedroom All Lights On
+  - if:
+    - condition: trigger
+      id: Philips Hue Dimmer "off_hold" action
+    then:
+    - service: light.turn_off
+      data:
+        transition: 1
+      target:
+        entity_id:
+        - light.master_bedroom_light_light
+        - light.bed_light_huelight
+  mode: single
+- id: '1672763007964'
+  alias: Dehumidifier Handler
+  description: Handler to notify when dehumidifiers need emptying
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.dining_room_dehumidifier_state
+    to: Standby
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    from: Active
+    id: Dining Room Dehumidifier
+  - platform: state
+    entity_id:
+    - sensor.kitchen_energy_state
+    from: Active
+    to: Standby
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    id: Kitchen Dehumidifier
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: Dining Room Dehumidifier
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: false
+        is_debug: false
+        is_system: false
+        message: Empty dining room dehumidifier!
+  - if:
+    - condition: trigger
+      id: Kitchen Dehumidifier
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: false
+        is_debug: false
+        is_system: false
+        message: Empty kitchen dehumidifier!
+  mode: single
+- id: '1672776928202'
+  alias: Bedtime
+  description: ''
+  trigger:
+  - platform: time
+    at: '20:30:00'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.school_day
+    state: 'on'
+  action:
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.75
+    target:
+      entity_id: media_player.landing_echo_dot
+  - type: turn_off
+    device_id: 2c0a4369b033b5ef7e8fedbfa30abb0f
+    entity_id: light.storylight
+    domain: light
+  - type: turn_on
+    device_id: 2c0a4369b033b5ef7e8fedbfa30abb0f
+    entity_id: light.storylight
+    domain: light
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - type: turn_off
+    device_id: 2c0a4369b033b5ef7e8fedbfa30abb0f
+    entity_id: light.storylight
+    domain: light
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - type: turn_on
+    device_id: 2c0a4369b033b5ef7e8fedbfa30abb0f
+    entity_id: light.storylight
+    domain: light
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: notify.alexa_media
+    data:
+      message: Time for bed. iPad's away. Night night.
+      target: media_player.landing_echo_dot
+      data:
+        type: tts
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: notify.alexa_media
+    data:
+      message: Time for bed. iPad's away. Night night.
+      target: media_player.landing_echo_dot
+      data:
+        type: tts
+  - type: turn_off
+    device_id: c53730b0680e2b69fe48ee4402b789b1
+    entity_id: switch.abigail_s_ipad
+    domain: switch
+  - type: turn_off
+    device_id: d71e950cd4686d97294e7d6802d51f29
+    entity_id: switch.george_s_ipad
+    domain: switch
+  mode: single
+- id: '1672934008638'
+  alias: Philips Hue Smart Button Handler
+  description: Handler for Philips Hue Smart Button
+  trigger:
+  - device_id: dccd62e50d847fc0e16580a4a0afde21
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+    id: Signify Netherlands B.V. ROM001 "on"
+  - device_id: dccd62e50d847fc0e16580a4a0afde21
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: turn_on
+    id: Signify Netherlands B.V. ROM001 "hold"
+  - device_id: dccd62e50d847fc0e16580a4a0afde21
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: turn_on
+    id: Signify Netherlands B.V. ROM001 "double"
+  - device_id: dccd62e50d847fc0e16580a4a0afde21
+    domain: zha
+    platform: device
+    type: remote_button_triple_press
+    subtype: turn_on
+    id: Signify Netherlands B.V. ROM001 "triple"
+  - device_id: dccd62e50d847fc0e16580a4a0afde21
+    domain: zha
+    platform: device
+    type: remote_button_quadruple_press
+    subtype: turn_on
+    id: Signify Netherlands B.V. ROM001 "quadruple"
+  - device_id: dccd62e50d847fc0e16580a4a0afde21
+    domain: zha
+    platform: device
+    type: remote_button_quintuple_press
+    subtype: turn_on
+    id: Signify Netherlands B.V. ROM001 "quintuple"
+  - device_id: dccd62e50d847fc0e16580a4a0afde21
+    domain: zha
+    platform: device
+    type: remote_button_short_release
+    subtype: turn_on
+    id: Signify Netherlands B.V. ROM001 "on released"
+  - device_id: dccd62e50d847fc0e16580a4a0afde21
+    domain: zha
+    platform: device
+    type: remote_button_long_release
+    subtype: turn_on
+    id: Signify Netherlands B.V. ROM001 "on release long press"
+  condition: []
+  action: []
+  mode: single
+- id: '1673137894967'
+  alias: Bathroom New
+  description: ''
+  trigger: []
+  condition: []
+  action:
+  - repeat:
+      while:
+      - type: is_occupied
+        condition: device
+        device_id: 13ff591684fab210e196fd1e5b72b37e
+        entity_id: binary_sensor.lumi_lumi_motion_agl04_occupancy
+        domain: binary_sensor
+      - condition: state
+        entity_id: input_boolean.bathroom_temporary_override
+        state: 'on'
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+  - service: notify.mobile_app_myphone
+    data:
+      message: Override ended, occupancy cleared.
+  mode: single
+- id: '1673213709016'
+  alias: Bathroom Occupancy Detection
+  description: ''
+  use_blueprint:
+    path: AlexanderBabel/occupancy.yaml
+    input:
+      door_sensor: binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+      motion_sensor: binary_sensor.lumi_lumi_motion_agl04_iaszone
+      turn_off_delay: 60
+      occupancy_helper: input_boolean.bathroom_occupancy_helper
+      last_motion_helper: input_datetime.bathroom_last_motion
+- id: '1673557785450'
+  alias: LoraTap 3-button switch Jessica handler
+  description: ''
+  trigger:
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+    id: button_1_single
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_1
+    id: button_1_double
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_1
+    id: button_1_long
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_2
+    id: button_2_single
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_2
+    id: button_2_double
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_2
+    id: button_2_long
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_3
+    id: button_3_single
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_3
+    id: button_3_double
+  - device_id: 9c56b6e42144c29116d5c51d41c6a0a5
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_3
+    id: button_3_long
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: button_1_single
+      sequence:
+      - service: light.toggle
+        data:
+          transition: 1
+        target:
+          entity_id: light.master_bedroom_light_light
+    - conditions:
+      - condition: trigger
+        id: button_1_double
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_1_long
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_2_single
+      sequence:
+      - service: light.toggle
+        data:
+          transition: 1
+        target:
+          entity_id: light.bed_light_huelight
+    - conditions:
+      - condition: trigger
+        id: button_2_double
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_2_long
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_3_single
+      sequence:
+      - service: light.turn_off
+        data:
+          transition: 1
+        target:
+          entity_id: light.all_master_bedroom_lights
+    - conditions:
+      - condition: trigger
+        id: button_3_double
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_3_long
+      sequence: []
+  mode: single
+- id: '1673559903698'
+  alias: LoraTap 3-button switch Jonathan handler
+  description: ''
+  trigger:
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+    id: button_1_single
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_1
+    id: button_1_double
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_1
+    id: button_1_long
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_2
+    id: button_2_single
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_2
+    id: button_2_double
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_2
+    id: button_2_long
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_3
+    id: button_3_single
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_3
+    id: button_3_double
+  - device_id: ba0003bb3f3278e9e0c2b9d3ff98d26b
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_3
+    id: button_3_long
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: button_1_single
+      sequence:
+      - service: light.toggle
+        data:
+          transition: 1
+        target:
+          entity_id: light.master_bedroom_light_light
+    - conditions:
+      - condition: trigger
+        id: button_1_double
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_1_long
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_2_single
+      sequence:
+      - service: light.toggle
+        data:
+          transition: 1
+        target:
+          entity_id: light.bed_light_huelight
+    - conditions:
+      - condition: trigger
+        id: button_2_double
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_2_long
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_3_single
+      sequence:
+      - service: light.turn_off
+        data:
+          transition: 1
+        target:
+          entity_id: light.all_master_bedroom_lights
+    - conditions:
+      - condition: trigger
+        id: button_3_double
+      sequence: []
+    - conditions:
+      - condition: trigger
+        id: button_3_long
+      sequence: []
+  mode: single
+- id: '1673615338578'
+  alias: Smoke Alarm Handler
+  description: ''
+  trigger:
+  - type: smoke
+    platform: device
+    device_id: f8861f1cadb0fa928b8ec0a4c11e642d
+    entity_id: binary_sensor.heiman_smokesensor_ef_3_0_iaszone
+    domain: binary_sensor
+    id: Detected
+  - platform: state
+    entity_id:
+    - binary_sensor.heiman_smokesensor_ef_3_0_iaszone
+    from: 'on'
+    to: 'off'
+    id: Cleared
+  - type: no_smoke
+    platform: device
+    device_id: f8861f1cadb0fa928b8ec0a4c11e642d
+    entity_id: binary_sensor.heiman_smokesensor_ef_3_0_iaszone
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: Cleared
+    enabled: false
+  - type: smoke
+    platform: device
+    device_id: 5e868b278814b618bf258ae395a1358c
+    entity_id: binary_sensor.heiman_smokesensor_ef_3_0_iaszone_2
+    domain: binary_sensor
+    id: Detected
+  - platform: state
+    entity_id:
+    - binary_sensor.heiman_smokesensor_ef_3_0_iaszone_2
+    from: 'on'
+    to: 'off'
+    id: Cleared
+  - type: no_smoke
+    platform: device
+    device_id: 5e868b278814b618bf258ae395a1358c
+    entity_id: binary_sensor.heiman_smokesensor_ef_3_0_iaszone_2
+    domain: binary_sensor
+    id: Cleared
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    enabled: false
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: true
+      is_debug: false
+      is_system: false
+      title: Smoke {{ trigger.id.title() }} in {{ area_name(trigger.entity_id) }}!
+      message: Smoke {{ trigger.id.title() }} in {{ area_name(trigger.entity_id) }}!
+  mode: single
+- id: '1673621771425'
+  alias: Carbon Monoxide Alarm Handler
+  description: ''
+  trigger:
+  - type: gas
+    platform: device
+    device_id: eb34842260ff4412790dea2b0e13b5e8
+    entity_id: binary_sensor.heiman_cosensor_ef_3_0_iaszone
+    domain: binary_sensor
+    id: Detected
+  - type: no_gas
+    platform: device
+    device_id: eb34842260ff4412790dea2b0e13b5e8
+    entity_id: binary_sensor.heiman_cosensor_ef_3_0_iaszone
+    domain: binary_sensor
+    id: Cleared
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    enabled: false
+  - platform: state
+    entity_id:
+    - binary_sensor.heiman_cosensor_ef_3_0_iaszone
+    from: 'on'
+    to: 'off'
+    id: Cleared
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: true
+      is_debug: false
+      is_system: false
+      title: Carbon Monoxide {{ trigger.id.title() }} in {{ area_name(trigger.entity_id)
+        }}!
+      message: Carbon Monoxide {{ trigger.id.title() }} in {{ area_name(trigger.entity_id)
+        }}!
+  mode: single
+- id: '1673881006523'
+  alias: Notify Zigbee Outage
+  description: Send a notification if the All Zigbee Lights group becomes unavailable
+  trigger:
+  - platform: state
+    entity_id:
+    - light.silicon_labs_ezsp_all_zigbee_lights_zha_group_0x0008
+    to: unavailable
+    id: unavailable
+  - platform: state
+    entity_id:
+    - light.silicon_labs_ezsp_all_zigbee_lights_zha_group_0x0008
+    id: available
+    from: unavailable
+    enabled: false
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id: unavailable
+    then:
+    - service: script.notification_handler
+      data_template:
+        is_critical: true
+        is_debug: false
+        is_system: true
+        title: Home Assistant
+        message: The Zigbee network appears to be down.
+    else:
+    - service: script.notification_handler
+      data_template:
+        is_critical: true
+        is_debug: false
+        is_system: true
+        title: Home Assistant
+        message: The Zigbee network appears to be down.
+  mode: single
+- id: '1674058394534'
+  alias: Kids Bedroom Light Sunrise Effect
+  description: ''
+  use_blueprint:
+    path: sbyx/wake-up-light-alarm-with-sunrise-effect.yaml
+    input:
+      light_entity: light.kids_bedroom_light_light
+      sunrise_duration: 15
+      check_entity: binary_sensor.school_day
+      end_brightness: 200
+      manual_time: 07:15:00
+- id: '1674516886522'
+  alias: Dining Room Lights Handler
+  description: ''
+  trigger:
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+    id: 1_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_1
+    id: 1_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_1
+    id: 1_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_2
+    id: 2_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_2
+    id: 2_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_2
+    id: 2_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_3
+    id: 3_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_3
+    id: 3_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_3
+    id: 3_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_4
+    id: 4_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_4
+    id: 4_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_4
+    id: 4_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_5
+    id: 5_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_5
+    id: 5_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_5
+    id: 5_Hold
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_6
+    id: 6_Single
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_6
+    id: 6_Double
+  - device_id: 61f9c63578d75df91ecb5c6463fb91c8
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button_6
+    id: 6_Hold
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 1_Single
+      sequence:
+      - service: light.toggle
+        data:
+          transition: 2
+          color_temp: 238
+          brightness_pct: 100
+        target:
+          entity_id: light.dining_room_lights
+    - conditions:
+      - condition: trigger
+        id: 1_Double
+      sequence:
+      - service: light.turn_on
+        data:
+          transition: 2
+          color_temp: 238
+          brightness_pct: 100
+        target:
+          entity_id: light.dining_room_lights
+    - conditions:
+      - condition: trigger
+        id: 1_Hold
+      sequence:
+      - service: light.turn_off
+        data:
+          transition: 2
+        target:
+          entity_id: light.dining_room_lights
+    - conditions:
+      - condition: trigger
+        id: 3_Single
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_step_pct: -10
+        target:
+          entity_id: light.dining_room_lights
+    - conditions:
+      - condition: trigger
+        id: 4_Single
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_step_pct: 10
+        target:
+          entity_id: light.dining_room_lights
+    - conditions:
+      - condition: trigger
+        id: 5_Single
+      sequence:
+      - service: light.turn_on
+        data:
+          color_temp: '{{state_attr(''light.dining_room_lights'', ''color_temp'')|int
+            + 34.6}}
+
+            '
+        target:
+          entity_id: light.dining_room_lights
+    - conditions:
+      - condition: trigger
+        id: 6_Single
+      sequence:
+      - service: light.turn_on
+        data:
+          color_temp: '{{state_attr(''light.dining_room_lights'', ''color_temp'')|int
+            - 34.6}}
+
+            '
+        target:
+          entity_id: light.dining_room_lights
+  mode: restart
+- id: '1674569382639'
+  alias: Advanced Circadian Lighting
+  description: ''
+  use_blueprint:
+    path: dimkaram/advanced_circadian_lighting.yaml
+    input:
+      circadian_function: Day & night (cosine)
+      lights_target:
+        entity_id: light.dining_room_lights
+      presence_entity: sensor.people_home
+      sleep_mode: None
+      circadian_type: Sun
+- id: '1674574826588'
+  alias: Saving Sessions Handler
+  description: Handler for Octopus Energy Saving Sessions
+  trigger:
+  - platform: calendar
+    event: start
+    offset: -0:1:0
+    entity_id: calendar.octopus_energy_saving_sessions
+    id: StartOfEvent
+  - platform: calendar
+    event: end
+    offset: 0:1:0
+    entity_id: calendar.octopus_energy_saving_sessions
+    id: EndOfEvent
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: StartOfEvent
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.saving_session
+    - conditions:
+      - condition: trigger
+        id: EndOfEvent
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.saving_session
+  mode: single
+- id: '1676115894031'
+  alias: wled_f1352d_text
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_text.wled_f1352d_text
+  condition: []
+  action:
+  - service: rest_command.wled_f1352d_text
+    data:
+      text: '{{states[''input_text.wled_f1352d_text''].state}}'
+  mode: single
+- id: '1676118038462'
+  alias: wled_d9dc04_text
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_text.wled_d9dc04_text
+  condition: []
+  action:
+  - service: rest_command.wled_d9dc04_text
+    data:
+      text: '{{states[''input_text.wled_d9dc04_text''].state}}'
+  mode: single
+- id: '1677537054099'
+  alias: AuroraWatch
+  description: ''
+  trigger:
+  - type: turned_on
+    platform: device
+    device_id: e4d0b8bdaaaaa86fb38beaec451d697c
+    entity_id: binary_sensor.aurora_visibility_aurora_visibility_alert
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: script.notification_handler
+    data_template:
+      is_critical: true
+      is_debug: false
+      is_system: false
+      title: AuroraWatch Alert
+      message: The aurora borealis will likely be visible in your location!
+  mode: single
+- id: '1682286128927'
+  alias: Enhanced Bathroom Lights Automation
+  description: ''
+  use_blueprint:
+    path: Blackshome/sensor-light.yaml
+    input:
+      include_night_light_control:
+      - use_transition
+      motion_trigger:
+      - binary_sensor.bathroom_binary_sensors
+      light_switch:
+        entity_id: scene.reset_bathroom_lights_lights_on
+      include_light_control:
+      - use_brightness
+      - use_transition
+      include_bypass: bypass_enabled_stop
+      bypass_time_delay: 10
+      include_ambient: ambient_disabled
+      ambient_light_sensor: sensor.lumi_lumi_sen_ill_mgl01_illuminance
+      ambient_light_options: ambient_light_option_enabled
+      include_zone: zone_disabled
+      include_night_lights: night_lights_enabled
+      night_lights:
+        entity_id: scene.bathroom_night_toilet_and_sink_lights_only_warm_white_50_brightness
+      night_lights_after_time: input_datetime.bathroom_night_start
+      night_lights_before_time: input_datetime.bathroom_night_end
+      motion_bypass: input_boolean.bathroom_temporary_override
+      ambient_light_value: 90
+      end_scenes:
+      - scene.reset_bathroom_lights_lights_off
