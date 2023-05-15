@@ -1,0 +1,144 @@
+- platform: ping
+  name: Internet
+  host: 8.8.8.8
+  scan_interval: 15
+
+- platform: command_line
+  name: Primary DNS
+  command: "nc -z 192.168.1.200 53 > /dev/null 2>&1 && echo success || echo fail"
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 10
+
+- platform: command_line
+  name: Secondary DNS
+  command: "nc -z 192.168.1.201 53 > /dev/null 2>&1 && echo success || echo fail"
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 10
+
+- platform: command_line
+  name: Primary DHCP
+  command: "nc -z -u 192.168.1.200 67 > /dev/null 2>&1 && echo success || echo fail"
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 10
+
+- platform: command_line
+  name: Secondary DHCP
+  command: "nc -z -u 192.168.1.201 67 > /dev/null 2>&1 && echo success || echo fail"
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 10
+
+- platform: command_line
+  name: Plex
+  command: "status_code=$(curl --write-out '%{http_code}\n' --silent --output /dev/null http://192.168.1.136:32400); if [[ $status_code -eq 401 ]]; then echo true; else echo false; fi"
+  device_class: connectivity
+  payload_on: "true"
+  payload_off: "false"
+  scan_interval: 10
+
+- platform: command_line
+  name: Synology DSM
+  command: "status_code=$(curl --write-out '%{http_code}\n' --silent --output /dev/null http://192.168.1.134:5000); if [[ $status_code -eq 200 ]]; then echo true; else echo false; fi"
+  device_class: connectivity
+  payload_on: "true"
+  payload_off: "false"
+  scan_interval: 10
+
+- platform: command_line
+  name: Sonoff Zigbee 3.0 USB Dongle Plus
+  unique_id: c3616b20-d860-11ec-9d64-0242ac120002
+  command: 'cat /sys/bus/usb/devices/*/product | grep -c Sonoff\ Zigbee\ 3.0\ USB\ Dongle\ Plus > /dev/null && echo success || echo fail'
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 30
+
+- platform: command_line
+  name: SkyConnect Zigbee Dongle
+  unique_id: c3616b20-d860-11ec-5fe3-0242ac120002
+  command: 'cat /sys/bus/usb/devices/*/product | grep -c SkyConnect > /dev/null && echo success || echo fail'
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 30
+
+- platform: command_line
+  name: Bluetooth Radio
+  unique_id: 999c6018-d862-11ec-9d64-0242ac120002
+  command: 'cat /sys/bus/usb/devices/*/product | grep -c Bluetooth\ Radio > /dev/null && echo success || echo fail'
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 30
+
+- platform: command_line
+  name: RFXtrx433
+  unique_id: 2bf547a2-6ab9-11ed-a1eb-0242ac120002
+  command: "cat /sys/bus/usb/devices/*/product | grep -c RFXtrx433 > /dev/null && echo success || echo fail"
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 30
+
+- platform: command_line
+  name: ASUS USB-BT500
+  unique_id: 999c6018-df3d-11ec-9d64-0242ac120002
+  command: "cat /sys/bus/usb/devices/*/product | grep -c USB-BT500 > /dev/null && echo success || echo fail"
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 30
+
+- platform: command_line
+  name: Ramses RF
+  unique_id: 999c4965-df3d-11ec-9d64-0242ac120002
+  command: "cat /sys/bus/usb/devices/*/product | grep -c evofw3 > /dev/null && echo success || echo fail"
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 30
+
+- platform: command_line
+  name: RTL433 Dongle
+  unique_id: b89dfbfc-d862-11ec-9d64-0242ac120002
+  command: "cat /sys/bus/usb/devices/*/product | grep -c RTL2838UHIDIR > /dev/null && echo success || echo fail"
+  device_class: connectivity
+  payload_on: "success"
+  payload_off: "fail"
+  scan_interval: 30
+
+- platform: template
+  sensors:
+    evohome_status:
+      device_class: problem
+      unique_id: binary_sensor.evohome_status
+      friendly_name: Honeywell EvoHome System Status
+      value_template: >-
+        {% if state_attr('climate.home', 'status').active_system_faults %}
+          on
+        {% else %}
+          off
+        {% endif %}
+
+- platform: template
+  sensors:
+    evohome_kitchen_battery:
+      device_class: battery
+      unique_id: binary_sensor.evohome_kitchen_battery
+      friendly_name: Honeywell EvoHome Kitchen Battery Status
+      value_template: >-
+        {% if state_attr('climate.home', 'status').active_system_faults %}
+        {% if state_attr('climate.home', 'status').active_system_faults[0].faultType == 'TempZoneActuatorLowBattery' %}
+          on
+        {% endif %}
+          off
+        {% else %}
+          off
+        {% endif %}
