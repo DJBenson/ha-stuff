@@ -1,0 +1,52 @@
+alias: Automate Heating - Turn Off Heating Based On Outside Temperature
+description: >-
+  This automation will turn on the heating if the following are true;
+
+  * The outside temperature is greater than or equal to the threshold (default:
+  15)
+
+  * The time of day falls between the operating hours (default: 07:00-16:00)
+
+  * The heating is currently turned on
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.ibs_th_10f3_temperature
+condition:
+  - condition: state
+    entity_id: input_boolean.override_heating
+    state: "off"
+  - condition: template
+    value_template: >-
+      {{ state_attr('sensor.ibs_th_10f3_temperature', 'temperature')|float(2) >=
+      states('input_number.heating_automation_setpoint')|float(2) }}
+    alias: Outdoor temperature goes above threshold
+  - condition: time
+    after: input_datetime.heating_automation_start_time
+    before: input_datetime.heating_automation_end_time
+    weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+      - sat
+      - sun
+    alias: Time is within automation window
+  - condition: state
+    entity_id: climate.home
+    state: heat
+    alias: The heating is currently on
+action:
+  - service: evohome.set_system_mode
+    data:
+      mode: HeatingOff
+    alias: Set heating controller to 'Off'
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      title: Home Assistant
+      message: Heating turned off by climate control
+mode: single
