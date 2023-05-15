@@ -1,0 +1,127 @@
+substitutions:
+  devicename: "lvwit-ab1e17"
+  devicename_upper: lvwit-ab1e17
+
+esphome:
+  name: $devicename
+  on_boot:
+    priority: 600
+    then:
+      - light.turn_on:
+          id: light1
+          brightness: 100%
+          cold_white: 100%
+libretiny:
+  board: generic-bk7231n-qfn32-tuya
+  framework:
+    version: latest
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  password: !secret ota_password
+
+web_server:
+  port: 80
+
+captive_portal:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot in case wifi connection fails
+  ap:
+    ssid: "Lvwit Fallback Hotspot"
+    password: !secret ap_password
+
+# Define output pins
+output:
+  - platform: ledc
+    id: output_red
+    pin: P8
+  - platform: ledc
+    id: output_green
+    pin: P24
+  - platform: ledc
+    id: output_blue
+    pin: P26
+  - platform: ledc
+    id: output_color_temperature
+    pin: P6
+    inverted: True
+  - platform: ledc
+    id: output_brightness
+    pin: P7
+
+light:
+  - platform: rgbct
+    name: $devicename
+    id: light1
+    red: output_red
+    green: output_green
+    blue: output_blue
+    color_temperature: output_color_temperature
+    white_brightness: output_brightness
+    cold_white_color_temperature: 6500 K
+    warm_white_color_temperature: 2000 K
+    color_interlock: True
+
+sensor:
+  - platform: uptime
+    name: Uptime Sensor
+    id: uptime_sensor
+    update_interval: 60s
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: uptime_human
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              return (
+                (days ? to_string(days) + "d " : "") +
+                (hours ? to_string(hours) + "h " : "") +
+                (minutes ? to_string(minutes) + "m " : "") +
+                (to_string(seconds) + "s")
+              ).c_str();
+
+  - platform: wifi_signal
+    name: "$devicename_upper WiFi Signal Sensor"
+    update_interval: 60s
+  - platform: uptime
+    name: "$devicename_upper Uptime Sensor"
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+    ssid:
+      name: "SSID"
+    bssid:
+      name: "BSSID"
+    mac_address:
+      name: "Mac Address"
+  - platform: template
+    name: Uptime Human Readable
+    id: uptime_human
+    icon: mdi:clock-start
+
+button:
+  - platform: restart
+    name: "$devicename Restart"
+  - platform: safe_mode
+    name: "$devicename Restart (Safe Mode)"
+  - platform: factory_reset
+    name: "$devicename Factory Reset"
