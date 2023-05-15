@@ -1,0 +1,47 @@
+alias: Automate Heating - Turn Off Heating Based On Proximity
+description: ""
+trigger:
+  - platform: numeric_state
+    entity_id: proximity.home
+    above: "2"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    alias: Proximity sensor detects no occupancy
+  - platform: state
+    entity_id:
+      - sensor.people_home
+    to: "False"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    alias: No occupancy detected for 1 minute
+condition:
+  - condition: state
+    entity_id: climate.home
+    state: "off"
+    alias: No occupancy detected
+  - condition: state
+    entity_id: proximity.home
+    attribute: dir_of_travel
+    state: away_from
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    alias: Proximity sensor detects travel away from home for 1 minute
+action:
+  - service: evohome.set_system_mode
+    data:
+      mode: HeatingOff
+    alias: Set heating controller to 'Off'
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      message: Heating turned off by proximity
+      title: Home Assistant
+mode: single
