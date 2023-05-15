@@ -1,0 +1,46 @@
+alias: Dehumidifier Handler
+description: Handler to notify when dehumidifiers need emptying
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.dining_room_dehumidifier_state
+    to: Standby
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    from: Active
+    id: Dining Room Dehumidifier
+  - platform: state
+    entity_id:
+      - sensor.kitchen_energy_state
+    from: Active
+    to: Standby
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    id: Kitchen Dehumidifier
+condition: []
+action:
+  - if:
+      - condition: trigger
+        id: Dining Room Dehumidifier
+    then:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: false
+          message: Empty dining room dehumidifier!
+  - if:
+      - condition: trigger
+        id: Kitchen Dehumidifier
+    then:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: false
+          message: Empty kitchen dehumidifier!
+mode: single
