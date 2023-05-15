@@ -1,0 +1,8 @@
+smart_home:
+  locale: en-GB
+  endpoint: https://api.eu.amazonalexa.com/v3/events
+  client_id: !secret alexa_client_id
+  client_secret: !secret alexa_client_secret
+  filter:
+    include_entities:
+      !include voice_assistant.yaml
