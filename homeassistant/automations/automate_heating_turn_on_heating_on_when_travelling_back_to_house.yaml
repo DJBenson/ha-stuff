@@ -1,0 +1,54 @@
+alias: Automate Heating - Turn On Heating On When Travelling Back To House
+description: ""
+trigger:
+  - platform: numeric_state
+    entity_id: proximity.home
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    below: "15"
+    alias: Proximity sensor detects travel within 15 miles of home
+condition:
+  - condition: state
+    entity_id: proximity.home
+    attribute: dir_of_travel
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    state: towards
+    alias: Proximity sensor detects direction of travel towards home
+  - condition: or
+    conditions:
+      - condition: and
+        conditions:
+          - condition: time
+            after: input_datetime.heating_automation_end_time
+            before: input_datetime.heating_automation_start_time
+            alias: The time is outside of the automation threshold
+          - condition: state
+            entity_id: climate.home
+            state: "off"
+            alias: The heating is off
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: climate.home
+            state: "off"
+            alias: The heating is off
+          - condition: numeric_state
+            entity_id: sensor.average_household_temperature
+            below: input_number.heating_automation_minimum_internal_temperature
+            alias: The internal temperature is less than the threshold
+action:
+  - service: evohome.reset_system
+    data: {}
+  - service: script.notification_handler
+    data_template:
+      is_critical: false
+      is_debug: true
+      is_system: false
+      message: Heating turned on by proximity
+      title: Home Assistant
+mode: single
