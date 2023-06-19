@@ -1,0 +1,250 @@
+type: picture-elements
+elements:
+  - type: state-icon
+    entity: sensor.<vehiclename>_last_updated_at
+    style:
+      right: 0
+      bottom: 0px
+      margin-bottom: 0px
+      transform: initial
+      font-size: 1em
+      line-height: 1em
+      '--paper-item-icon-color': BLACK
+  - type: state-label
+    entity: sensor.<vehiclename>_last_updated_at
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      bottom: 0px
+      right: 30px
+      margin-bottom: 0px
+      color: black
+  - type: state-icon
+    entity: device_tracker.<vehiclename>_location
+    style:
+      right: 0
+      bottom: 0px
+      margin-bottom: 25px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: device_tracker.<vehiclename>_location
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      bottom: 0px
+      right: 30px
+      margin-bottom: 25px
+      color: black
+  - type: state-icon
+    entity: lock.<vehiclename>_door_lock
+    style:
+      left: 0
+      top: 0px
+      margin-top: 0px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: lock.<vehiclename>_door_lock
+    title: lock.<vehiclename>_door_lock
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      top: 0px
+      left: 30px
+      margin-top: 0px
+      color: black
+  - type: state-icon
+    entity: binary_sensor.<vehiclename>_front_right_door
+    title: binary_sensor.<vehiclename>_front_right_door
+    style:
+      left: 0
+      top: 0px
+      margin-top: 25px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: binary_sensor.<vehiclename>_front_right_door
+    title: binary_sensor.<vehiclename>_front_right_door
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      top: 0px
+      left: 30px
+      margin-top: 25px
+      color: black
+  - type: state-icon
+    entity: binary_sensor.<vehiclename>_trunk
+    style:
+      left: 0
+      top: 0px
+      margin-top: 50px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: binary_sensor.<vehiclename>_trunk
+    title: binary_sensor.<vehiclename>_trunk
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      top: 0px
+      left: 30px
+      margin-top: 50px
+      color: black
+  - type: state-icon
+    entity: binary_sensor.<vehiclename>_tire_pressure_all
+    style:
+      left: 0
+      top: 0px
+      margin-top: 75px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: binary_sensor.<vehiclename>_tire_pressure_all
+    title: binary_sensor.<vehiclename>_tire_pressure_all
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      top: 0px
+      left: 30px
+      margin-top: 74px
+      color: black
+  - type: state-icon
+    entity: sensor.<vehiclename>_total_driving_range
+    style:
+      left: 0
+      bottom: 3px
+      margin-bottom: 0px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: sensor.<vehiclename>_total_driving_range
+    title: sensor.<vehiclename>_total_driving_range
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      bottom: 0px
+      left: 30px
+      margin-bottom: 0px
+      color: black
+  - type: state-icon
+    entity: sensor.<vehiclename>_odometer
+    style:
+      left: 0
+      bottom: 3px
+      margin-bottom: 25px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: sensor.<vehiclename>_odometer
+    title: sensor.<vehiclename>_odometer
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      bottom: 0px
+      left: 30px
+      margin-bottom: 25px
+      color: black
+  - type: state-icon
+    entity: binary_sensor.<vehiclename>_ev_battery_plug
+    style:
+      right: 0
+      top: 0px
+      margin-top: 0px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: binary_sensor.<vehiclename>_ev_battery_plug
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      top: 0px
+      right: 30px
+      margin-top: 0px
+      color: black
+  - type: state-icon
+    entity: binary_sensor.<vehiclename>_ev_battery_charge
+    style:
+      right: 0
+      top: 25px
+      margin-top: 0px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: binary_sensor.<vehiclename>_ev_battery_charge
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 5.5em
+      top: 0px
+      right: 30px
+      margin-top: 0px
+      color: black
+  - type: state-icon
+    entity: sensor.<vehiclename>_ev_battery_level
+    style:
+      right: 0
+      top: 50px
+      margin-top: 0px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: sensor.<vehiclename>_ev_battery_level
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 5.5em
+      top: 0px
+      right: 30px
+      margin-top: 25px
+      color: black
+  - type: state-icon
+    entity: sensor.<vehiclename>_car_battery_level
+    style:
+      right: 0
+      top: 75px
+      margin-top: 0px
+      transform: initial
+      font-size: 1em
+      line-height: 2em
+      '--paper-item-icon-color': black
+  - type: state-label
+    entity: sensor.<vehiclename>_car_battery_level
+    style:
+      transform: initial
+      font-size: 1em
+      line-height: 5.5em
+      top: 0px
+      right: 30px
+      margin-top: 50px
+      color: black
+image: local/images/EV6.jpg
