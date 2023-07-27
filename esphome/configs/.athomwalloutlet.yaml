@@ -1,0 +1,142 @@
+esphome:
+  name: "${device_name}"
+  friendly_name: "${device_name_upper}"
+  project:
+    name: "${project_name}"
+    version: "${project_version}"
+  
+esp8266:
+  board: esp8285
+  restore_from_flash: true
+
+dashboard_import:
+  package_import_url: github://
+
+preferences:
+  flash_write_interval: 1min
+
+uart:
+  rx_pin: RX
+  baud_rate: 4800
+    
+globals:
+  - id: total_energy
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+      
+  - platform: gpio
+    pin:
+      number: 5
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Power Button"
+    disabled_by_default: true
+    on_multi_click:
+      - timing:
+          - ON for at most 1s
+          - OFF for at least 0.2s
+        then:
+          - switch.toggle: relay
+      - timing:
+          - ON for at least 4s
+        then:
+          - button.press: Reset
+
+sensor:
+  - platform: cse7766
+
+    current:
+        name: "Current"
+        id: current
+        unit_of_measurement: A
+        accuracy_decimals: 3
+        filters:
+          - lambda: if (x < 0.0260) return 0; else return (x - 0.0260);
+
+    voltage:
+        name: "Voltage"
+        id: voltage
+        unit_of_measurement: V
+        accuracy_decimals: 1
+
+    power:
+        name: "Power"
+        id: power
+        unit_of_measurement: W
+        filters:
+            - calibrate_linear:
+                - 0.0000 -> 0.5900 # Relay off no load
+                - 0.0000 -> 1.5600 # Relay on no load
+                - 198.5129 -> 87.8300
+                - 434.2469 -> 189.5000
+                - 628.6241 -> 273.9000
+                - 1067.0067 -> 460.1000
+                - 1619.8098 -> 699.2000
+                - 2043.0282 -> 885.0000
+            # Normalize for plug load
+            - lambda: if (x < 1.5600) return 0; else return (x - 1.5600);
+    update_interval: 5s
+
+    energy:
+        name: "Energy"
+        id: energy
+        unit_of_measurement: kWh
+        filters:
+          # Multiplication factor from W to kW is 0.001
+          - multiply: 0.001
+        on_value:
+          then:
+            - lambda: |-
+                static float previous_energy_value = 0.0;
+                float current_energy_value = id(energy).state;
+                id(total_energy) += current_energy_value - previous_energy_value;
+                previous_energy_value = current_energy_value;
+
+  - platform: template
+    name: "Total Energy"
+    unit_of_measurement: kWh
+    device_class: "energy"
+    state_class: "total_increasing"
+    icon: "mdi:lightning-bolt"
+    accuracy_decimals: 3
+    lambda: |-
+        return id(total_energy);
+    update_interval: 10s
+
+  - platform: total_daily_energy
+    name: "Daily Energy"
+    restore: true
+    power_id: power
+    unit_of_measurement: kWh
+    accuracy_decimals: 3
+    filters:
+        - multiply: 0.001
+
+switch:
+  - platform: gpio
+    name: "Wall Outlet"
+    pin: GPIO12
+    id: relay
+    restore_mode: ${relay_restore_mode}
+    on_turn_on:
+      - light.turn_on: red_led
+    on_turn_off:
+      - light.turn_off: red_led
+    
+light:
+  - platform: status_led
+    name: "Status LED"
+    id: red_led
+    disabled_by_default: true
+    pin:
+      inverted: true
+      number: GPIO13
+
+time:
+  - platform: sntp
+    id: sntp_time
