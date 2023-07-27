@@ -1,0 +1,15 @@
+substitutions:
+  device_name: "athom-wall-outlet"
+  device_name_upper: "athom-wall-outlet"
+  project_name: "Athom Technology.Wall Outlet"
+  project_version: "1.1"
+  relay_restore_mode: RESTORE_DEFAULT_OFF
+  activity_threshold: "5"
+
+packages:
+  # Base configuration (OTA, default sensors etc.)
+  wifi: !include .wifi.yaml
+  # WiFi (WLAN config, captive portal, Improv serial, WiFi sensors etc.)
+  device_base: !include .base.yaml
+  # Device specific configuration
+  device_main: !include .athomwalloutlet.yaml
