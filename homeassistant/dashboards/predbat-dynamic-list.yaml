@@ -1,0 +1,88 @@
+type: vertical-stack
+title: Predbat
+cards:
+  - type: custom:collapsable-cards
+    title: Control
+    defaultOpen: false
+    cards:
+      - type: custom:collapsable-cards
+        title: Input Variables
+        defaultOpen: false
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: entities
+            filter:
+              include:
+                - entity_id: input_number.predbat*
+              exclude: []
+            sort:
+              method: friendly_name
+              numeric: false
+      - type: custom:collapsable-cards
+        title: Switches
+        defaultOpen: false
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: entities
+            filter:
+              include:
+                - entity_id: switch.predbat*
+              exclude: []
+            sort:
+              method: friendly_name
+              numeric: false
+  - type: custom:collapsable-cards
+    title: Sensors
+    defaultOpen: false
+    cards:
+      - type: custom:collapsable-cards
+        title: Cost Sensors
+        defaultOpen: false
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: entities
+            filter:
+              include:
+                - entity_id: predbat.*cost*
+                - entity_id: predbat.*rate*
+              exclude:
+                - entity_id: predbat.*start*
+                - entity_id: predbat.*end*
+                - entity_id: predbat.*duration*
+            sort:
+              method: friendly_name
+              numeric: false
+      - type: custom:collapsable-cards
+        title: Time/Duration Sensors
+        defaultOpen: false
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: entities
+            filter:
+              include:
+                - entity_id: predbat.*start*
+                - entity_id: predbat.*end*
+                - entity_id: predbat.*duration*
+              exclude: []
+            sort:
+              method: friendly_name
+              numeric: false
+      - type: custom:collapsable-cards
+        title: Power Sensors
+        defaultOpen: false
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: entities
+            filter:
+              include:
+                - entity_id: predbat.*kw*
+                - entity_id: predbat.*soc*
+              exclude: []
+            sort:
+              method: friendly_name
+              numeric: false
