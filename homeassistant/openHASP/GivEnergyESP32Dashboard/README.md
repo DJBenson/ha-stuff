@@ -1,3 +1,4 @@
+![Generation-No-Charging](https://github.com/DJBenson/ha-stuff/assets/1013909/1d4e876d-88f5-4f27-9397-5fc097a80b41)
 # GivEnergy Dashboard for WT32-SC01
 This directory contains the openHASP jsonl file and the yaml file for Home Assistant to implement the GivEnergy dashboard on a WT32-SC01 ESP32 device with inbuilt display.
 
@@ -21,6 +22,7 @@ There are enough guides on the internet for me to not document how to set up any
 * Restart Home Assistant
 
 ![OpenHASP_GivEnergy_1_Discharging_No_Solar](https://github.com/DJBenson/ha-stuff/assets/1013909/cd845a1b-7101-4d77-8f70-3b63126aea1a)
-![OpenHASP_GivEnergy_Original](https://github.com/DJBenson/ha-stuff/assets/1013909/ed158efe-7e95-430c-bf99-02ee69258e7c)
+![OpenHASP_GivEnergy_Original](https![Generation-And-Charging](https://github.com/DJBenson/ha-stuff/assets/1013909/c231939a-56de-4d1c-9c5a-c45797bbed0b)
+://github.com/DJBenson/ha-stuff/assets/1013909/ed158efe-7e95-430c-bf99-02ee69258e7c)
 ![OpenHASP_GivEnergy_2_Charging_House_Load_No_Solar](https://github.com/DJBenson/ha-stuff/assets/1013909/a3d6d59a-0cb3-475c-ace9-f04da80a4ca0)
 ![OpenHASP_GivEnergy_2_Charging_No_Solar](https://github.com/DJBenson/ha-stuff/assets/1013909/0d8a514b-dd32-44c8-b4f7-566147593df8)
