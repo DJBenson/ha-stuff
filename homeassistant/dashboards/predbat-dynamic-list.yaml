@@ -1,10 +1,13 @@
 type: vertical-stack
 title: Predbat
 cards:
+  - type: entity
+    entity: predbat.status
   - type: custom:collapsable-cards
     title: Control
     defaultOpen: false
     cards:
+      - type: entities
       - type: custom:collapsable-cards
         title: Input Variables
         defaultOpen: false
