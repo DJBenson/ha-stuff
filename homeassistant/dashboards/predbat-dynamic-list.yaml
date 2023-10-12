@@ -7,7 +7,6 @@ cards:
     title: Control
     defaultOpen: false
     cards:
-      - type: entities
       - type: custom:collapsable-cards
         title: Input Variables
         defaultOpen: false
@@ -19,6 +18,7 @@ cards:
               include:
                 - entity_id: input_number.predbat*
               exclude: []
+            unique: true
             sort:
               method: friendly_name
               numeric: false
@@ -33,6 +33,7 @@ cards:
               include:
                 - entity_id: switch.predbat*
               exclude: []
+            unique: true
             sort:
               method: friendly_name
               numeric: false
@@ -51,10 +52,12 @@ cards:
               include:
                 - entity_id: predbat.*cost*
                 - entity_id: predbat.*rate*
+                - entity_id: predbat.*metric*
               exclude:
                 - entity_id: predbat.*start*
                 - entity_id: predbat.*end*
                 - entity_id: predbat.*duration*
+            unique: true
             sort:
               method: friendly_name
               numeric: false
@@ -70,7 +73,9 @@ cards:
                 - entity_id: predbat.*start*
                 - entity_id: predbat.*end*
                 - entity_id: predbat.*duration*
+                - entity_id: predbat.*record*
               exclude: []
+            unique: true
             sort:
               method: friendly_name
               numeric: false
@@ -83,9 +88,14 @@ cards:
               type: entities
             filter:
               include:
-                - entity_id: predbat.*kw*
                 - entity_id: predbat.*soc*
+                - entity_id: predbat.*energy*
+                - entity_id: predbat.*load*
+                - entity_id: predbat.*battery*
+                - entity_id: predbat.*kw*
+                - entity_id: predbat.*power*
               exclude: []
+            unique: true
             sort:
               method: friendly_name
               numeric: false
