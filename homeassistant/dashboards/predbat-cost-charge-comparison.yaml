@@ -1,0 +1,37 @@
+type: custom:apexcharts-card
+header:
+  show: true
+  title: Planned charging slots
+  show_states: true
+  colorize_states: true
+graph_span: 36h
+span:
+  start: minute
+  offset: '-4h'
+now:
+  show: true
+series:
+  - entity: predbat.best_charge_limit_kw
+    stroke_width: 1
+    curve: stepline
+    name: charge_limit_best
+    type: area
+    opacity: 0.4
+    data_generator: >
+      let res = []; for (const [key, value] of
+      Object.entries(entity.attributes.results)) { res.push([new
+      Date(key).getTime(), value]); } return res.sort((a, b) => { return a[0] -
+      b[0]  })
+    show:
+      in_header: raw
+  - entity: predbat.rates
+    stroke_width: 2
+    curve: stepline
+    name: import
+    data_generator: >
+      let res = []; for (const [key, value] of
+      Object.entries(entity.attributes.results)) { res.push([new
+      Date(key).getTime(), value]); } return res.sort((a, b) => { return a[0] -
+      b[0]  })
+    show:
+      in_header: raw
