@@ -1,14 +1,14 @@
 type: vertical-stack
-title: Predbat
+title: Predbat 🦇
 cards:
   - type: entity
     entity: predbat.status
   - type: custom:collapsable-cards
-    title: Control
+    title: 🔀 Control
     defaultOpen: false
     cards:
       - type: custom:collapsable-cards
-        title: Input Variables
+        title: 🔢 Input Variables
         defaultOpen: false
         cards:
           - type: custom:auto-entities
@@ -23,7 +23,7 @@ cards:
               method: friendly_name
               numeric: false
       - type: custom:collapsable-cards
-        title: Switches
+        title: 🔀 Switches
         defaultOpen: false
         cards:
           - type: custom:auto-entities
@@ -38,11 +38,11 @@ cards:
               method: friendly_name
               numeric: false
   - type: custom:collapsable-cards
-    title: Sensors
+    title: '#️⃣ Sensors'
     defaultOpen: false
     cards:
       - type: custom:collapsable-cards
-        title: Cost Sensors
+        title: 💷 Cost Sensors
         defaultOpen: false
         cards:
           - type: custom:auto-entities
@@ -62,7 +62,7 @@ cards:
               method: friendly_name
               numeric: false
       - type: custom:collapsable-cards
-        title: Time/Duration Sensors
+        title: 🕛 Time/Duration Sensors
         defaultOpen: false
         cards:
           - type: custom:auto-entities
@@ -80,7 +80,7 @@ cards:
               method: friendly_name
               numeric: false
       - type: custom:collapsable-cards
-        title: Power Sensors
+        title: ⚡ Power Sensors
         defaultOpen: false
         cards:
           - type: custom:auto-entities
@@ -94,6 +94,21 @@ cards:
                 - entity_id: predbat.*battery*
                 - entity_id: predbat.*kw*
                 - entity_id: predbat.*power*
+              exclude: []
+            unique: true
+            sort:
+              method: friendly_name
+              numeric: false
+      - type: custom:collapsable-cards
+        title: 1️⃣ Binary Sensors
+        defaultOpen: false
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: entities
+            filter:
+              include:
+                - entity_id: binary_sensor.predbat*
               exclude: []
             unique: true
             sort:
