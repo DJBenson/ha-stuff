@@ -1,0 +1,9 @@
+type: custom:collapsable-cards
+title: Predbat plan
+defaultOpen: false
+cards:
+  - type: custom:html-template-card
+    title: Predbat plan
+    ignore_line_breaks: true
+    content: |
+      {{ state_attr('predbat.plan_html', 'html') }}
