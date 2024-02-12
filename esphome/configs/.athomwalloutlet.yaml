@@ -11,7 +11,7 @@ esp8266:
   restore_from_flash: true
 
 dashboard_import:
-  package_import_url: github://
+  package_import_url: github://DJBenson/ha-stuff/esphome/configs/athom-wall-outlet.yaml
 
 preferences:
   flash_write_interval: 1min
