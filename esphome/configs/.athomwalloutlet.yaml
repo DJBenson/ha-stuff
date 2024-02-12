@@ -1,9 +1,10 @@
 esphome:
-  name: "${device_name}"
-  friendly_name: "${device_name_upper}"
+  name: "${devicename}"
+  friendly_name: "${devicename_upper}"
   project:
     name: "${project_name}"
     version: "${project_version}"
+  name_add_mac_suffix: true
   
 esp8266:
   board: esp8285
@@ -116,6 +117,21 @@ sensor:
     accuracy_decimals: 3
     filters:
         - multiply: 0.001
+
+  - platform: template
+    name: "Apparent Power"
+    unit_of_measurement: "VA"
+    accuracy_decimals: "${decimal_resolution}"
+    icon: "mdi:lightning-bolt"
+    lambda: |-
+      return id(voltage).state * id(current).state;
+    
+  - platform: template
+    name: "Power Factor"
+    accuracy_decimals: "${decimal_resolution}"
+    icon: "mdi:alpha-f-circle-outline"
+    lambda: |-
+      return id(power).state / (id(voltage).state * id(current).state);
 
 switch:
   - platform: gpio
