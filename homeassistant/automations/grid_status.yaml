@@ -1,0 +1,66 @@
+alias: Grid Status Notifications
+description: Notifies loss / resumption of grid status to home battery system
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.grid_status
+    from: "off"
+    to: "on"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: grid_lost
+  - platform: state
+    entity_id:
+      - binary_sensor.grid_status
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: grid_resumed
+condition: []
+action:
+  - if:
+      - condition: trigger
+        id:
+          - grid_lost
+    then:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: false
+          message: >
+            Connection to the grid lost - house is on battery. 
+
+            Current load is {{ states('sensor.givtcp_XXXXXXXXXX_load_power')|int
+            }}W.
+
+            Current state of charge is {{
+            states('sensor.givtcp_XXXXXXXXXX_soc')|int }}%.
+
+            Battery will last approximately {{
+            ((states('sensor.givtcp_XXXXXXXXXX_discharge_time_remaining')|int)/60)|int
+            }} hours.
+  - if:
+      - condition: trigger
+        id:
+          - grid_resumed
+    then:
+      - service: script.notification_handler
+        data_template:
+          is_critical: false
+          is_debug: false
+          is_system: false
+          message: >
+            Connection to the grid resumed.
+
+            Current load is {{ states('sensor.givtcp_XXXXXXXXXX_load_power')|int
+            }}W.
+
+            Current battery state of charge is {{
+            states('sensor.givtcp_XXXXXXXXXX_soc')|int }}%.
+mode: single
