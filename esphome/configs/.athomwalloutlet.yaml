@@ -13,6 +13,15 @@ esp8266:
 dashboard_import:
   package_import_url: github://DJBenson/ha-stuff/esphome/configs/athom-wall-outlet.yaml
 
+packages:
+  remote_package:
+    url: github://DJBenson/ha-stuff/esphome/configs
+    refresh: 0d
+    files: [
+      .base.yaml
+      .wifi.yaml
+    ]
+
 preferences:
   flash_write_interval: 1min
 
