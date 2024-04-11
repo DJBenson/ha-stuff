@@ -1,0 +1,29 @@
+wifi:
+    networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+  
+    # Enable fallback hotspot (captive portal) in case wifi connection fails
+    ap:
+      ssid: "$devicename"
+      password: !secret ap_password
+
+captive_portal:
+
+#improv_serial:
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+    ssid:
+      name: "SSID"
+    bssid:
+      name: "BSSID"
+    mac_address:
+      name: "Mac Address"
