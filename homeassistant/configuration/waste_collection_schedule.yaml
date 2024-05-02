@@ -1,0 +1,57 @@
+sources:
+  - name: static # Source 0
+    args:
+      type: Refuse Burgundy
+      weekdays: MO
+      frequency: WEEKLY
+      start: "2024-04-01"
+      until: "2025-03-31"
+      interval: 1
+    customize:
+      - type: Refuse Burgundy
+        alias: General Waste (Burgundy)
+        icon: mdi:trash-can
+    calendar_title: General Waste
+  - name: static # Source 1
+    args:
+      type: Refuse Blue
+      frequency: WEEKLY
+      interval: 2
+      weekdays: MO
+      start: "2024-04-08"
+      until: "2025-03-24"
+      dates:
+        - "2024-12-21"
+    customize:
+      - type: Refuse Blue
+        alias: Recycling (Blue)
+        icon: mdi:recycle
+    calendar_title: Recycling
+  - name: static # Source 2
+    args:
+      type: Refuse Green
+      frequency: WEEKLY
+      interval: 2
+      weekdays: MO
+      start: "2024-04-01"
+      until: "2025-03-31"
+      excludes:
+        - "2024-12-21"
+    customize:
+      - type: Refuse Green
+        alias: Garden Waste (Green)
+        icon: mdi:tree
+    calendar_title: Garden Waste
+  - name: static # Source 3
+    args:
+      type: Refuse White
+      frequency: WEEKLY
+      interval: 2
+      weekdays: MO
+      start: "2024-04-01"
+      until: "2025-03-31"
+    customize:
+      - type: Refuse White
+        alias: Waste Paper (White Sack)
+        icon: mdi:newspaper
+    calendar_title: Paper
