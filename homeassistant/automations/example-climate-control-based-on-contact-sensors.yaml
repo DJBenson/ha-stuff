@@ -1,0 +1,41 @@
+description: "Turn off the heating when the window opens. Take a snapshot of the climate settings before turning off the heating and restore those settings when the window is closed again."
+mode: single
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.<Your Contact Sensor>
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.<Your Contact Sensor>
+            state: "on"
+        sequence:
+          - service: scene.create
+            metadata: {}
+            data:
+              snapshot_entities:
+                - climate.<Your Climate Entity>
+              scene_id: master_bedroom_climate_scene
+          - service: climate.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: climate.<Your Climate Entity>
+        alias: Window Open - Heating Off
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.<Your Contact Sensor>
+            state: "off"
+        sequence:
+          - service: scene.turn_on
+            metadata: {}
+            target:
+              entity_id: scene.<Unique Name For Your Scene>
+          - service: scene.delete
+            metadata: {}
+            data: {}
+            target:
+              entity_id: scene.<Unique Name For Your Scene>
+        alias: Window Closed - Heating Restored
