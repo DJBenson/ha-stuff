@@ -1,0 +1,340 @@
+# An all in one, easy to implement package to interface the GivEnergy EV Charger with Home Assistant using the GivEnergy Cloud.
+#
+# Instructions to install:
+# 1) Ensure you have a folder named packages in your config folder
+# 2) Include the folder in your configuration.yaml under the homeassistant: node as such: packages: !include_dir_named packages/
+# 3) Download or copy/paste the contents of this file to config/packages/givenergy_evc.yaml
+# 4) Generate an API key via the GivEnergy portal
+# 5) Add your API key to secrets.yaml ensuring you retain the word "Bearer", e.g. givenergy_apikey: "Bearer <YourKey>"
+# 6) Restart Home Assistant
+#
+# Credit to Oliver Shingler (AKA Speak To The Geek) for the inspiration.
+#
+# This version has the following differences/improvements;
+# * Single package file which can be dragged and dropped into Home Assistant with little effort
+# * Implements a select (drop down) for the charger mode rather than individual switches. Original switches included for those who prefer them
+# * Split the sensors for "plugged in" and "charging"
+# * Various state-based icon templates
+# * More stuff I likely forgot
+
+input_select:
+  givenergy_evc_mode:
+    name: "GivEnergy EVC Mode"
+    options:
+      - "Solar"
+      - "Hybrid"
+      - "Grid"
+    initial: "Grid"
+    icon: mdi:menu
+
+template:
+  - binary_sensor:
+      - name: "GivEnergy EVC Connected"
+        unique_id: givenergy_evc_connected
+        state: >-
+          {% if is_state('sensor.givenergy_evc_status','Preparing') %}
+            true
+          {%  elif is_state('sensor.givenergy_evc_status','Charging') %}
+            true
+          {%  elif is_state('sensor.givenergy_evc_status','SuspendedEVSE') %}
+            true
+          {%  elif is_state('sensor.givenergy_evc_status','SuspendedEV') %}
+            true
+          {%  elif is_state('sensor.givenergy_evc_status','Finishing') %}
+            true
+          {% endif %}
+        icon: >-
+          {% if is_state('sensor.givenergy_evc_status','Preparing') %}
+            mdi:power-plug-battery
+          {%  elif is_state('sensor.givenergy_evc_status','Charging') %}
+            mdi:power-plug-battery
+          {%  elif is_state('sensor.givenergy_evc_status','SuspendedEVSE') %}
+            mdi:power-plug-battery
+          {%  elif is_state('sensor.givenergy_evc_status','SuspendedEV') %}
+            mdi:power-plug-battery
+          {%  elif is_state('sensor.givenergy_evc_status','Finishing') %}
+            mdi:power-plug-battery
+          {% else %}
+            mdi:power-plug-battery-outline
+          {% endif %}
+
+  - sensor:
+    - name: "GivEnergy EVC Car Plugged In"
+      state: >-
+        {% if is_state('binary_sensor.givenergy_evc_connected','on')  %}
+          Plugged In
+        {% else %}
+          Unplugged
+        {% endif %}
+      icon: >-
+        {% if is_state('binary_sensor.givenergy_evc_connected','on')  %}
+          mdi:power-plug-battery
+        {% else %}
+          mdi:power-plug-battery-outline
+        {% endif %}
+
+  - sensor:
+    - name: "GivEnergy EVC Car Charging"
+      state: >-
+        {% if is_state('sensor.givenergy_evc_status','charging') %}
+          Charging
+        {% else %}
+          Not Charging
+        {% endif %}
+      icon: >-
+        {% if is_state('sensor.givenergy_evc_status','charging') %}
+          mdi:battery-charging
+        {% else %}
+          mdi:battery
+        {% endif %}
+
+switch:
+  - platform: template
+    switches:
+      givenergy_evc_mode_hybrid:
+        friendly_name: "GivEnergy EVC Mode: Hybrid"
+        value_template: "{{ is_state('sensor.givenergy_evc_mode', 'Hybrid') }}"
+        turn_on:
+          service: rest_command.givenergy_evc_setmode
+          data:
+            mode: Eco
+        turn_off:
+          service: rest_command.givenergy_evc_setmode
+          data:
+            mode: Eco
+      givenergy_evc_mode_solar:
+        friendly_name: "GivEnergy EVC Mode: Solar"
+        value_template: "{{ is_state('sensor.givenergy_evc_mode', 'Solar') }}"
+        turn_on:
+          service: rest_command.givenergy_evc_setmode
+          data:
+            mode: SuperEco
+        turn_off:
+          service: rest_command.givenergy_evc_setmode
+          data:
+            mode: SuperEco
+      givenergy_evc_mode_grid:
+        friendly_name: "GivEnergy EVC Mode: Grid"
+        value_template: "{{ is_state('sensor.givenergy_evc_mode', 'Grid') }}"
+        turn_on:
+          service: rest_command.givenergy_evc_setmode
+          data:
+            mode: Boost
+        turn_off:
+          service: rest_command.givenergy_evc_setmode
+          data:
+            mode: Boost
+      givenergy_evc_plugandgo:
+        friendly_name: "GivEnergy EVC Plug&Go"
+        value_template: "{{ is_state('binary_sensor.givenergy_evc_plug_and_go_state', 'on') }}"
+        turn_on:
+          service: rest_command.givenergy_evc_setplugandgo
+          data:
+            enabled: "true"
+        turn_off:
+          service: rest_command.givenergy_evc_setplugandgo
+          data:
+            enabled: "false"
+      givenergy_evc_chargingstopstart:
+        friendly_name: "GivEnergy EVC Charging Stop/Start"
+        value_template: "{{ is_state('sensor.givenergy_evc_status', 'Charging') }}"
+        turn_on:
+          service: rest_command.givenergy_evc_startcharge
+          data: {}
+        turn_off:
+          service: rest_command.givenergy_evc_stopcharge
+          data: {}
+      givenergy_evc_leds:
+        friendly_name: "GivEnergy EVC LEDs"
+        value_template: "{{ is_state('binary_sensor.givenergy_evc_led_state', 'on') }}"
+        turn_on:
+          service: rest_command.givenergy_evc_leds
+          data:
+            value: "1"
+        turn_off:
+          service: rest_command.givenergy_evc_leds
+          data:
+            value: "0"
+
+rest_command:
+  givenergy_evc_setmode:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/change-mode'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: '{"mode": "{{ mode }}"}'
+  givenergy_evc_setplugandgo:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-plug-and-go/'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: '{"enabled": {{ enabled }}}'
+  givenergy_evc_startcharge:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/start-charge'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+  givenergy_evc_stopcharge:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/stop-charge'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+  givenergy_evc_leds:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/enable-front-panel-led/'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: '{"value": {{ value }}}'
+
+rest:
+  - resource_template: "https://api.givenergy.cloud/v1/ev-charger?page=1"
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    sensor:
+      - name: "GivEnergy EVC Status"
+        unique_id: givenergy_evc_status
+        value_template: "{{ value_json.data[0].status }}"
+        icon: >
+          {% if value_json.data[0].status == 'Charging' or value_json.data[0].status == 'Finishing' %}
+            mdi:battery-charging-outline
+          {% elif value_json.data[0].status == 'Preparing' or value_json.data[0].status == 'SuspendedEVSE' or value_json.data[0].status == 'SuspendedEV' %}
+            mdi:power-plug-battery-outline
+          {% else %}
+            mdi:power-plug-off-outline
+          {% endif %}
+      - name: "GivEnergy EVC UUID "
+        unique_id: givenergy_evc_uuid
+        value_template: "{{ value_json.data[0].uuid }}"
+      - name: "GivEnergy EVC Power "
+        unique_id: givenergy_evc_power
+        value_template: >-
+          {% if value_json.data[0].power_now is defined %}
+            {{ value_json.data[0].power_now.value }}
+          {% else %}
+            0
+          {% endif %}
+        device_class: "power"
+        state_class: "measurement"
+        unit_of_measurement: "kW"
+      - name: "GivEnergy EVC Power (W)"
+        unique_id: givenergy_evc_power_watts
+        value_template: >-
+          {% if value_json.data[0].power_now is defined %} 
+            {{ ((value_json.data[0].power_now.value)|float * 1000)|int }}
+          {% else %}
+            0
+          {% endif %}
+        device_class: "power"
+        state_class: "measurement"
+        unit_of_measurement: "W"
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/meter-data?start_time={{ (utcnow() - timedelta( minutes = 1 )).strftime("%Y-%m-%dT%H:%M:%SZ") }}&end_time={{ utcnow().strftime("%Y-%m-%dT%H:%M:%SZ") }}&measurands[]=4&meter_ids[]=0&page=1&pageSize=1'
+    scan_interval: 300
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    sensor:
+      - name: "GivEnergy EVC Energy"
+        unique_id: givenergy_evc_energy
+        value_template: "{{ value_json.data[0].measurements[0].value }}"
+        device_class: "energy"
+        state_class: "total_increasing"
+        unit_of_measurement: "Wh"
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/change-mode/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    sensor:
+      - name: "GivEnergy EVC Mode"
+        unique_id: givenergy_evc_mode
+        value_template: >-
+          {% if value_json.data[0].active %}
+            Solar
+          {% elif value_json.data[1].active %}
+            Hybrid
+          {% elif value_json.data[2].active %}
+            Grid
+          {% else %}
+            Unknown
+          {% endif %}
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-plug-and-go/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    binary_sensor:
+      - name: "GivEnergy EVC Plug And Go State"
+        unique_id: givenergy_evc_plugandgo_state
+        value_template: "{{ value_json.data.value }}"
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/enable-front-panel-led/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    binary_sensor:
+      - name: "GivEnergy EVC LED State"
+        unique_id: givenergy_evc_led_state
+        value_template: "{{ value_json.data.value }}"
+
+automation:
+  - alias: GivEnergy EVC Mode
+    description: ""
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.givenergy_evc_mode
+        id: get_mode
+      - platform: state
+        entity_id:
+          - input_select.givenergy_evc_mode
+        id: set_mode
+        from: null
+        to: null
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_mode
+            sequence:
+              - service: input_select.select_option
+                metadata: {}
+                data:
+                  option: "{{ states('sensor.givenergy_evc_mode') }}"
+                target:
+                  entity_id: input_select.givenergy_evc_mode
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_mode
+            sequence:
+              - service: rest_command.givenergy_evc_setmode
+                metadata: {}
+                data_template:
+                  mode: |
+                    {% if is_state('input_select.givenergy_evc_mode','Hybrid') %}
+                      Eco
+                    {% elif is_state('input_select.givenergy_evc_mode','Solar') %}
+                      SuperEco
+                    {% else %}
+                      Boost
+                    {% endif %}
+    mode: single
