@@ -4,6 +4,7 @@ template:
       state: >-
         {{ states('sensor.your_battery_sensor')|int }}
       device_class: battery
+      unit_of_measurement: "%"
       icon: >-
         {% if states('sensor.your_battery_sensor')|int == 100 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
           mdi:battery
