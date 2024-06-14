@@ -1,0 +1,30 @@
+template:
+  - sensor:
+    - name: "Template Battery Sensor"
+      state: >-
+        {{ states('sensor.your_battery_sensor')|int }}
+      device_class: battery
+      icon: >-
+        {% if states('sensor.your_battery_sensor')|int == 100 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery
+        {% elif states('sensor.your_battery_sensor')|int >= 90 and states('sensor.your_battery_sensor')|int < 100 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-90
+        {% elif states('sensor.your_battery_sensor')|int >= 80 and states('sensor.your_battery_sensor')|int < 90 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-80
+        {% elif states('sensor.your_battery_sensor')|int >= 70 and states('sensor.your_battery_sensor')|int < 80 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-70
+        {% elif states('sensor.your_battery_sensor')|int >= 60 and states('sensor.your_battery_sensor')|int < 70 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-60
+        {% elif states('sensor.your_battery_sensor')|int >= 50 and states('sensor.your_battery_sensor')|int < 60 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-50
+        {% elif states('sensor.your_battery_sensor')|int >= 40 and states('sensor.your_battery_sensor')|int < 50 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-40
+        {% elif states('sensor.your_battery_sensor')|int >= 30 and states('sensor.your_battery_sensor')|int < 40 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-30
+        {% elif states('sensor.your_battery_sensor')|int >= 20 and states('sensor.your_battery_sensor')|int < 30 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-20
+        {% elif states('sensor.your_battery_sensor')|int >= 10 and states('sensor.your_battery_sensor')|int < 20 and not is_state('sensor.your_battery_sensor', 'unavailable') %}
+          mdi:battery-10
+        {% else %}
+          mdi:battery-outline
+        {% endif %}
