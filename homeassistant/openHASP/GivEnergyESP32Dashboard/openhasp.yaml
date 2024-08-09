@@ -5,40 +5,40 @@ givenergy:
         "text": "{{ states('sensor.time') }}"
     - obj: "p0b2" # wifi sensor
       properties:
-        "text_color": "{% if -30 <= state_attr('openhasp.wt32_sc01_plus','rssi') |int %}green{% elif -31 > state_attr('openhasp.wt32_sc01_plus','rssi') |int >= -50 %}orange{% elif -51 > state_attr('openhasp.wt32_sc01_plus','rssi') |int >= -80 %}tomato{% else %}red{% endif %}"
+        "text_color": "{% if -30 <= state_attr('openhasp.<YourDeviceName>','rssi') |int %}green{% elif -31 > state_attr('openhasp.<YourDeviceName>','rssi') |int >= -50 %}orange{% elif -51 > state_attr('openhasp.<YourDeviceName>','rssi') |int >= -80 %}tomato{% else %}red{% endif %}"
     - obj: "p0b3" # outside temperature
       properties:
-        "text": "{{ states('sensor.ibs_th_10f3_temperature')|round(1) }}°C"
+        "text": "{{ states('sensor.<YourTemperatureSensor>')|round(1) }}°C"
     - obj: "p1b208" # grid load label
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_import_power')|int < 1000  %}        
-          {{ states('sensor.givtcp_YOURSERIAL_import_power')|int|round(0) if not (is_state('sensor.givtcp_YOURSERIAL_load_power','unavailable')) }} W
+          {% if states('sensor.givtcp_<YourSerial>_import_power')|int < 1000  %}        
+          Grid: {{ states('sensor.givtcp_<YourSerial>_import_power')|int|round(0) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} W
           {% else %}
-          {{ (states('sensor.givtcp_YOURSERIAL_import_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_YOURSERIAL_load_power','unavailable')) }} kWh
+          Grid: {{ (states('sensor.givtcp_<YourSerial>_import_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kWh
           {% endif %}
     - obj: "p1b209" # current unit rate label
       properties:
-        "text": "{{ states('sensor.octopus_energy_electricity_18p2169495_1610014634663_current_rate')|float|round(3) if not (is_state('sensor.octopus_energy_electricity_18p2169495_1610014634663_current_rate','unavailable')) }}p/kWh"
+        "text": "Rate: {{ states('sensor.octopus_energy_electricity_<YourMeterEntities>_current_rate')|float|round(3) if not (is_state('sensor.octopus_energy_electricity_<YourMeterEntities>_current_rate','unavailable')) }}p/kWh"
     - obj: "p1b210" # battery power label
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_battery_power')|int < 1000  %}        
-          {{ states('sensor.givtcp_YOURSERIAL_battery_power')|int|round(0) if not (is_state('sensor.givtcp_YOURSERIAL_load_power','unavailable')) }} W
+          {% if states('sensor.givtcp_<YourSerial>_battery_power')|int < 1000  %}        
+          {{ states('sensor.givtcp_<YourSerial>_battery_power')|int|round(0) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} W
           {% else %}
-          {{ (states('sensor.givtcp_YOURSERIAL_battery_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_YOURSERIAL_load_power','unavailable')) }} kWh
+          {{ (states('sensor.givtcp_<YourSerial>_battery_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kWh
           {% endif %}
     - obj: "p1b211" # battery soc
       properties:
-        "text": "{{ states('sensor.givtcp_YOURSERIAL_soc') | int if not (is_state('sensor.givtcp_YOURSERIAL_soc','unavailable')) }}%"
+        "text": "{{ states('sensor.givtcp_<YourSerial>_soc') | int if not (is_state('sensor.givtcp_<YourSerial>_soc','unavailable')) }}%"
     - obj: "p1b212" # battery charge status
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_battery_power')|int < 0  %}
+          {% if states('sensor.givtcp_<YourSerial>_battery_power')|int < 0  %}
           Charging
-          {% elif states('sensor.givtcp_YOURSERIAL_battery_power')|int > 0  %}
+          {% elif states('sensor.givtcp_<YourSerial>_battery_power')|int > 0  %}
           Discharging
-          {% elif states('sensor.givtcp_YOURSERIAL_battery_power')|int == 0  %}
+          {% elif states('sensor.givtcp_<YourSerial>_battery_power')|int == 0  %}
           Idle
           {% else %}
           --------
@@ -46,25 +46,25 @@ givenergy:
     - obj: "p1b213" # pv generation label
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_pv_power')|int < 1000  %}        
-          {{ states('sensor.givtcp_YOURSERIAL_pv_power')|int|round(0) if not (is_state('sensor.givtcp_YOURSERIAL_load_power','unavailable')) }} W
+          {% if states('sensor.givtcp_<YourSerial>_pv_power')|int < 1000  %}        
+          {{ states('sensor.givtcp_<YourSerial>_pv_power')|int|round(0) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} W
           {% else %}
-          {{ (states('sensor.givtcp_YOURSERIAL_pv_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_YOURSERIAL_load_power','unavailable')) }} kWh
+          {{ (states('sensor.givtcp_<YourSerial>_pv_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kWh
           {% endif %}
     - obj: "p1b214" # house load label
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_load_power')|int < 1000  %}        
-          {{ states('sensor.givtcp_YOURSERIAL_load_power')|int|round(0) if not (is_state('sensor.givtcp_YOURSERIAL_load_power','unavailable')) }}
+          {% if states('sensor.givtcp_<YourSerial>_load_power')|int < 1000  %}        
+          {{ states('sensor.givtcp_<YourSerial>_load_power')|int|round(0) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }}
           {% else %}
-          {{ (states('sensor.givtcp_YOURSERIAL_load_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_YOURSERIAL_load_power','unavailable')) }}
+          {{ (states('sensor.givtcp_<YourSerial>_load_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }}
           {% endif %}
     - obj: "p1b205" # house <-> grid arrow
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_import_power')|int < 0  %}
+          {% if states('sensor.givtcp_<YourSerial>_import_power')|int < 0  %}
           {{ "\uE05D" | e }}
-          {% elif states('sensor.givtcp_YOURSERIAL_import_power')|int > 0  %}
+          {% elif states('sensor.givtcp_<YourSerial>_import_power')|int > 0  %}
           {{ "\uE045" | e }}
           {% else %}
           {{ "\uE374" | e }}
@@ -72,9 +72,9 @@ givenergy:
     - obj: "p1b206" # battery <-> house arrow
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_battery_power')|int < 0  %}
+          {% if states('sensor.givtcp_<YourSerial>_battery_power')|int < 0  %}
           {{ "\uE045" | e }}
-          {% elif states('sensor.givtcp_YOURSERIAL_battery_power')|int > 0  %}
+          {% elif states('sensor.givtcp_<YourSerial>_battery_power')|int > 0  %}
           {{ "\uE05D" | e }}
           {% else %}
           {{ "\uE374" | e }}
@@ -82,11 +82,11 @@ givenergy:
     - obj: "p1b203" # battery soc icon
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_soc')|int >= 90 %}
+          {% if states('sensor.givtcp_<YourSerial>_soc')|int >= 90 %}
           {{ "\uF2A3" | e }}
-          {% elif states('sensor.givtcp_YOURSERIAL_soc')|int >= 50 and states('sensor.givtcp_YOURSERIAL_soc')|int < 90 %}
+          {% elif states('sensor.givtcp_<YourSerial>_soc')|int >= 50 and states('sensor.givtcp_<YourSerial>_soc')|int < 90 %}
           {{ "\uF2A2" | e }}
-          {% elif states('sensor.givtcp_YOURSERIAL_soc')|int > 10 and states('sensor.givtcp_YOURSERIAL_soc')|int < 50 %}
+          {% elif states('sensor.givtcp_<YourSerial>_soc')|int > 10 and states('sensor.givtcp_<YourSerial>_soc')|int < 50 %}
           {{ "\uF2A1" | e }}
           {% else %}
           {{ "\uE08E" | e }}
@@ -94,9 +94,9 @@ givenergy:
     - obj: "p1b204" # solar icon
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_pv_power')|int == 0 and states('sun.sun') == 'above_horizon' %}
+          {% if states('sensor.givtcp_<YourSerial>_pv_power')|int == 0 and states('sun.sun') == 'above_horizon' %}
           {{ "\uE590" | e }}
-          {% elif states('sensor.givtcp_YOURSERIAL_pv_power')|int == 0 and states('sun.sun') == 'below_horizon' %}
+          {% elif states('sensor.givtcp_<YourSerial>_pv_power')|int == 0 and states('sun.sun') == 'below_horizon' %}
           {{ "\uE594" | e }}
           {% else %}
           {{ "\uE5A8" | e }}
@@ -104,7 +104,7 @@ givenergy:
     - obj: "p1b207" # pv generation arrow
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_pv_power')|int == 0  %}
+          {% if states('sensor.givtcp_<YourSerial>_pv_power')|int == 0  %}
           {{ "\uE374" | e }}
           {% else %}
           {{ "\uE054" | e }}
@@ -112,8 +112,28 @@ givenergy:
     - obj: "p1b215" # house load unit label
       properties:
         "text": >
-          {% if states('sensor.givtcp_YOURSERIAL_load_power')|int > 999  %}
+          {% if states('sensor.givtcp_<YourSerial>_load_power')|int > 999  %}
           kWh
           {% else %}
           watts
           {% endif %}
+    - obj: "p1b218" # EVC arrow
+      properties:
+        "text": >
+          {% if states('sensor.<YourEVPowerSensor>')|int > 0  %}
+          {{ "\uE04D" | e }}
+          {% else %}
+          {{ "\uE374" | e }}
+          {% endif %}
+    - obj: "p1b219" # EVC power
+      properties:
+        "text": >
+          {% if states('sensor.<YourEVPowerSensor>')|int > 0  %}
+          {{ states('sensor.<YourEVPowerSensor>')|float|round(1) if not (is_state('sensor.<YourEVPowerSensor>','unavailable')) }} kWh
+          {% else %}
+          {{ "Idle" | e }}
+          {% endif %}
+    - obj: "p1b220" # EV SoC
+      properties:
+        "text": >
+          {{ states('sensor.<YourEVSoCSensor>')|int|round(0) if not (is_state('sensor.sensor.<YourEVSoCSensor>','unavailable')) }}%
