@@ -15,14 +15,15 @@ There are enough guides on the internet for me to not document how to set up any
 
 ## Steps to Implement:
 
+* Upload the images from this repository to the openHASP web interface for your target device
 * Copy/paste the [jsonl](./pages.jsonl) file to the openHASP web interface for your target device
 * Copy/paste the [yaml](./openhasp.yaml) file to the relevant place in Home Assistant - I have a seperate openhasp.yaml file which is included in my configuration.yaml file - YMMV
-* Replace all instances of YOURSERIAL with the correct GivTCP entities for your device
+* Replace all placeholders with the correct entities for your setup (there are placeholders for the outdoor temperature sensor, your WT32-SC01 device name, your GivEnergy serial, your Octopus sensors plus sensors for the EV charger and EV state of charge).
 * Restart Home Assistant
 
-![OpenHASP_GivEnergy_1_Discharging_No_Solar](https://github.com/DJBenson/ha-stuff/assets/1013909/cd845a1b-7101-4d77-8f70-3b63126aea1a)
-![OpenHASP_GivEnergy_2_Charging_House_Load_No_Solar](https://github.com/DJBenson/ha-stuff/assets/1013909/a3d6d59a-0cb3-475c-ace9-f04da80a4ca0)
-![OpenHASP_GivEnergy_2_Charging_No_Solar](https://github.com/DJBenson/ha-stuff/assets/1013909/0d8a514b-dd32-44c8-b4f7-566147593df8)
-![Generation-No-Charging](https://github.com/DJBenson/ha-stuff/assets/1013909/e91a09a1-f346-46c6-a550-9f977b60f764)
-![Generation-And-Charging](https://github.com/DJBenson/ha-stuff/assets/1013909/2536e194-083c-4a93-a617-0f2249641b65)
-![OpenHASP_GivEnergy_Original](https://github.com/DJBenson/ha-stuff/assets/1013909/ed158efe-7e95-430c-bf99-02ee69258e7c)
+## Customising:
+
+* This setup assumes you have a GivEnergy setup, a GivEnergy EV Charger and a car that provides sensors for the charging power and state of charge. If you don't have substitutes for these sensors, you need to remove the lines from the openhasp.yaml file which relate to those entities as well as removing them from pages.jsonl. For example if you wish to remove the EV battery state of charge and charging power, you can remove line 38-45 in pages.jasonl and lines 912 to 931 in openhasp.yaml.
+
+![image](https://github.com/user-attachments/assets/bb24ec39-18ed-4efd-832c-7433ecd5b0dd)
+
