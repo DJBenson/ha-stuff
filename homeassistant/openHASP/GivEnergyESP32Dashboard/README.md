@@ -29,4 +29,4 @@ There are enough guides on the internet for me to not document how to set up any
 
 ## 3D Printed Case:
 
-The [WT32-SC01-Plus Stand with socket.stl](./WT32-SC01-Plus Stand with socket.stl) file provides a handy way to display the device with cable routing underneath. I got mine printed by [JLCPCB](https://jlcpcb.com/) and they cost about $7 each printed in white resin.
+The WT32-SC01-Plus Stand with socket.stl file provides a handy way to display the device with cable routing underneath. I got mine printed by [JLCPCB](https://jlcpcb.com/) and they cost about $7 each printed in white resin.
