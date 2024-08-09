@@ -15,7 +15,7 @@ There are enough guides on the internet for me to not document how to set up any
 
 ## Steps to Implement:
 
-* Upload the images from this repository to the openHASP web interface for your target device
+* Upload the image from this repository to the openHASP web interface for your target device
 * Copy/paste the [jsonl](./pages.jsonl) file to the openHASP web interface for your target device
 * Copy/paste the [yaml](./openhasp.yaml) file to the relevant place in Home Assistant - I have a seperate openhasp.yaml file which is included in my configuration.yaml file - YMMV
 * Replace all placeholders with the correct entities for your setup (there are placeholders for the outdoor temperature sensor, your WT32-SC01 device name, your GivEnergy serial, your Octopus sensors plus sensors for the EV charger and EV state of charge).
