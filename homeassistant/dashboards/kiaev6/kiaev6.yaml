@@ -1,7 +1,7 @@
 type: picture-elements
 elements:
   - type: state-icon
-    entity: sensor.<vehiclename>_last_updated_at
+    entity: sensor.eevee_last_updated_at
     style:
       right: 0
       bottom: 0px
@@ -9,9 +9,9 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 1em
-      '--paper-item-icon-color': BLACK
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: sensor.<vehiclename>_last_updated_at
+    entity: sensor.eevee_last_updated_at
     style:
       transform: initial
       font-size: 1em
@@ -19,19 +19,20 @@ elements:
       bottom: 0px
       right: 30px
       margin-bottom: 0px
-      color: black
+      color: white
   - type: state-icon
-    entity: device_tracker.<vehiclename>_location
+    entity: binary_sensor.smoothed_eevee_tile_tracker
+    icon: mdi:map-marker
     style:
       right: 0
-      bottom: 0px
+      bottom: 2px
       margin-bottom: 25px
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: device_tracker.<vehiclename>_location
+    entity: binary_sensor.smoothed_eevee_tile_tracker
     style:
       transform: initial
       font-size: 1em
@@ -39,9 +40,9 @@ elements:
       bottom: 0px
       right: 30px
       margin-bottom: 25px
-      color: black
+      color: white
   - type: state-icon
-    entity: lock.<vehiclename>_door_lock
+    entity: lock.eevee_door_lock
     style:
       left: 0
       top: 0px
@@ -49,10 +50,10 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: lock.<vehiclename>_door_lock
-    title: lock.<vehiclename>_door_lock
+    entity: lock.eevee_door_lock
+    title: lock.eevee_door_lock
     style:
       transform: initial
       font-size: 1em
@@ -60,10 +61,10 @@ elements:
       top: 0px
       left: 30px
       margin-top: 0px
-      color: black
+      color: white
   - type: state-icon
-    entity: binary_sensor.<vehiclename>_front_right_door
-    title: binary_sensor.<vehiclename>_front_right_door
+    entity: binary_sensor.eevee_front_right_door
+    title: binary_sensor.eevee_front_right_door
     style:
       left: 0
       top: 0px
@@ -71,10 +72,10 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: binary_sensor.<vehiclename>_front_right_door
-    title: binary_sensor.<vehiclename>_front_right_door
+    entity: binary_sensor.eevee_front_right_door
+    title: binary_sensor.eevee_front_right_door
     style:
       transform: initial
       font-size: 1em
@@ -82,9 +83,9 @@ elements:
       top: 0px
       left: 30px
       margin-top: 25px
-      color: black
+      color: white
   - type: state-icon
-    entity: binary_sensor.<vehiclename>_trunk
+    entity: binary_sensor.eevee_trunk
     style:
       left: 0
       top: 0px
@@ -92,10 +93,10 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: binary_sensor.<vehiclename>_trunk
-    title: binary_sensor.<vehiclename>_trunk
+    entity: binary_sensor.eevee_trunk
+    title: binary_sensor.eevee_trunk
     style:
       transform: initial
       font-size: 1em
@@ -103,9 +104,9 @@ elements:
       top: 0px
       left: 30px
       margin-top: 50px
-      color: black
+      color: white
   - type: state-icon
-    entity: binary_sensor.<vehiclename>_tire_pressure_all
+    entity: binary_sensor.eevee_tire_pressure_all
     style:
       left: 0
       top: 0px
@@ -113,10 +114,10 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: binary_sensor.<vehiclename>_tire_pressure_all
-    title: binary_sensor.<vehiclename>_tire_pressure_all
+    entity: binary_sensor.eevee_tire_pressure_all
+    title: binary_sensor.eevee_tire_pressure_all
     style:
       transform: initial
       font-size: 1em
@@ -124,9 +125,9 @@ elements:
       top: 0px
       left: 30px
       margin-top: 74px
-      color: black
+      color: white
   - type: state-icon
-    entity: sensor.<vehiclename>_total_driving_range
+    entity: sensor.eevee_total_driving_range
     style:
       left: 0
       bottom: 3px
@@ -134,10 +135,10 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: sensor.<vehiclename>_total_driving_range
-    title: sensor.<vehiclename>_total_driving_range
+    entity: sensor.eevee_total_driving_range
+    title: sensor.eevee_total_driving_range
     style:
       transform: initial
       font-size: 1em
@@ -145,9 +146,9 @@ elements:
       bottom: 0px
       left: 30px
       margin-bottom: 0px
-      color: black
+      color: white
   - type: state-icon
-    entity: sensor.<vehiclename>_odometer
+    entity: sensor.eevee_odometer
     style:
       left: 0
       bottom: 3px
@@ -155,10 +156,10 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: sensor.<vehiclename>_odometer
-    title: sensor.<vehiclename>_odometer
+    entity: sensor.eevee_odometer
+    title: sensor.eevee_odometer
     style:
       transform: initial
       font-size: 1em
@@ -166,9 +167,9 @@ elements:
       bottom: 0px
       left: 30px
       margin-bottom: 25px
-      color: black
+      color: white
   - type: state-icon
-    entity: binary_sensor.<vehiclename>_ev_battery_plug
+    entity: sensor.eevee_plugged_in
     style:
       right: 0
       top: 0px
@@ -176,9 +177,9 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: binary_sensor.<vehiclename>_ev_battery_plug
+    entity: sensor.eevee_plugged_in
     style:
       transform: initial
       font-size: 1em
@@ -186,9 +187,9 @@ elements:
       top: 0px
       right: 30px
       margin-top: 0px
-      color: black
+      color: white
   - type: state-icon
-    entity: binary_sensor.<vehiclename>_ev_battery_charge
+    entity: sensor.givenergy_ev_status
     style:
       right: 0
       top: 25px
@@ -196,9 +197,9 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: binary_sensor.<vehiclename>_ev_battery_charge
+    entity: sensor.givenergy_ev_status
     style:
       transform: initial
       font-size: 1em
@@ -206,9 +207,9 @@ elements:
       top: 0px
       right: 30px
       margin-top: 0px
-      color: black
+      color: white
   - type: state-icon
-    entity: sensor.<vehiclename>_ev_battery_level
+    entity: sensor.eevee_estimated_state_of_charge
     style:
       right: 0
       top: 50px
@@ -216,9 +217,9 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: sensor.<vehiclename>_ev_battery_level
+    entity: sensor.eevee_estimated_state_of_charge
     style:
       transform: initial
       font-size: 1em
@@ -226,9 +227,9 @@ elements:
       top: 0px
       right: 30px
       margin-top: 25px
-      color: black
+      color: white
   - type: state-icon
-    entity: sensor.<vehiclename>_car_battery_level
+    entity: sensor.bm2_battery_charge
     style:
       right: 0
       top: 75px
@@ -236,9 +237,9 @@ elements:
       transform: initial
       font-size: 1em
       line-height: 2em
-      '--paper-item-icon-color': black
+      '--paper-item-icon-color': white
   - type: state-label
-    entity: sensor.<vehiclename>_car_battery_level
+    entity: sensor.bm2_battery_charge
     style:
       transform: initial
       font-size: 1em
@@ -246,5 +247,5 @@ elements:
       top: 0px
       right: 30px
       margin-top: 50px
-      color: black
-image: local/images/EV6.jpg
+      color: white
+image: local/images/EV6-dark.png
