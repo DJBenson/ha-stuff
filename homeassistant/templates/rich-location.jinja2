@@ -1,0 +1,44 @@
+{% macro rich-location(person_entity, ic3_tracker, app_tracker, section_id, hide_if_home) -%}
+{%- set person = person_entity -%}
+{%- set device_tracker_ic3 = ic3_tracker -%}
+{%- set device_tracker_app = app_tracker -%}
+{%- set section_id = section_id -%}
+{%- set zone_name = expand(device_entities(device_id(device_tracker_ic3))) | selectattr('entity_id', 'search', 'zone') | rejectattr('entity_id','search', 'last') | rejectattr('entity_id','search', 'name') | rejectattr('entity_id','search', 'distance') | map(attribute='entity_id') | list | join(', ') -%}
+{%- set friendly_zone_name = expand(device_entities(device_id(device_tracker_ic3))) | selectattr('entity_id', 'search', 'zone_fname') | rejectattr('entity_id','search', 'last') | rejectattr('entity_id','search', 'distance') | map(attribute='entity_id') | list | join(', ') -%}
+{%- set geocoded_location = expand(device_entities(device_id(device_tracker_app))) | selectattr('entity_id', 'search', 'geocoded_location') | map(attribute='entity_id') | list | join(', ') -%}
+{%- set dir_of_travel = expand(device_entities(device_id(device_tracker_ic3))) | selectattr('entity_id', 'search', 'dir_of_travel') | map(attribute='entity_id') | list | join(', ') -%}
+{%- set waze_distance = expand(device_entities(device_id(device_tracker_ic3))) | selectattr('entity_id', 'search', 'waze_distance') | map(attribute='entity_id') | list | join(', ') -%}
+{%- set travel_time = expand(device_entities(device_id(device_tracker_ic3))) | selectattr('entity_id', 'search', 'travel_time') | rejectattr('entity_id','search', 'hhmm') | rejectattr('entity_id','search', 'min') | map(attribute='entity_id') | list | join(', ') -%}
+{%- set distance_string = states(waze_distance) + ' mi / ' + states(travel_time) + ' mins' -%}
+
+{%- if not is_state(dir_of_travel,'inZone') and not is_state(dir_of_travel,'inHomeZone') and is_state(dir_of_travel,'AwayFrom') -%}
+  {%- set direction_string = 'Leaving' -%}
+{%- elif not is_state(dir_of_travel,'inZone') and not is_state(dir_of_travel,'inHomeZone') and is_state(dir_of_travel,'Towards')  -%}
+  {%- set direction_string = 'Returning' -%}
+{%- else -%}
+  {%- set direction_string = 'Stationary' -%}
+{%- endif -%}
+
+{%- set travel_summary = direction_string + ' / ' + distance_string -%}
+{%- if states(person) == 'home' -%}
+  {%- set current_location_string = 'Home' -%}
+{%- elif not is_state(zone_name,'home') and not is_state(zone_name,'not_home') and not is_state(zone_name,'ic3_stationary_1') -%}
+  {%- set current_location_string = states(friendly_zone_name) -%}
+{%- else -%}
+  {%- set current_location_string = state_attr(geocoded_location,'Thoroughfare') + ', ' + state_attr(geocoded_location,'Sub Locality') -%}
+{%- endif -%}
+
+{%- if section_id == 1 -%}
+  {%- if hide_if_home and states(person) == 'home' -%}
+  {%- else -%}
+    {{- current_location_string -}}
+  {%- endif -%}
+{%- elif section_id == 2 -%}
+  {%- if hide_if_home and states(person) == 'home' -%}
+  {%- else -%}
+    {{- travel_summary -}}
+  {%- endif -%}
+{%- else -%}
+  Invalid Section ID
+{%- endif -%}
+{% endmacro %}
