@@ -16,6 +16,8 @@ To use the templates you need to import the template as follows, using a dummy p
 
 Refer to the readme with each template for usage instructions.
 
+* [Rich Location](./README.md#rich-location)
+
 # Rich Location
 
 This template amalgamates data from various sources (all of which are mandatory to use this template);
