@@ -1,5 +1,5 @@
 # Home Assistant Templates
-This directory contains Home Assistant templates in jinja2 format.
+This directory contains Home Assistant templates in jinja format.
 
 Required Home Assistant 2023.4 or newer.
 
