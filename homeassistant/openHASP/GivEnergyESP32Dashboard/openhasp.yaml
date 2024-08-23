@@ -86,7 +86,7 @@ givenergy:
           {% if states('sensor.givtcp_<YourSerial>_import_power')|int < 1000  %}        
           Grid: {{ states('sensor.givtcp_<YourSerial>_import_power')|int|round(0) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} W
           {% else %}
-          Grid: {{ (states('sensor.givtcp_<YourSerial>_import_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kWh
+          Grid: {{ (states('sensor.givtcp_<YourSerial>_import_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kW
           {% endif %}
     - obj: "p1b9" # current unit rate label
       properties:
@@ -97,7 +97,7 @@ givenergy:
           {% if states('sensor.givtcp_<YourSerial>_battery_power')|int < 1000  %}        
           {{ states('sensor.givtcp_<YourSerial>_battery_power')|int|round(0) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} W
           {% else %}
-          {{ (states('sensor.givtcp_<YourSerial>_battery_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kWh
+          {{ (states('sensor.givtcp_<YourSerial>_battery_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kW
           {% endif %}
     - obj: "p1b11" # battery soc
       properties:
@@ -120,7 +120,7 @@ givenergy:
           {% if states('sensor.givtcp_<YourSerial>_pv_power')|int > 0 and states('sensor.givtcp_<YourSerial>_pv_power')|int < 1000  %}        
           {{ states('sensor.givtcp_<YourSerial>_pv_power')|int|round(0) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} W
           {% elif states('sensor.givtcp_<YourSerial>_pv_power')|int >= 1000  %}
-          {{ (states('sensor.givtcp_<YourSerial>_pv_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kWh
+          {{ (states('sensor.givtcp_<YourSerial>_pv_power')|int / 1000)|round(2) if not (is_state('sensor.givtcp_<YourSerial>_load_power','unavailable')) }} kW
           {% else %}
           Idle
           {% endif %}
@@ -136,7 +136,7 @@ givenergy:
       properties:
         "text": >
           {% if states('sensor.givtcp_<YourSerial>_load_power')|int > 999  %}
-          kWh
+          kW
           {% else %}
           watts
           {% endif %}
@@ -164,7 +164,7 @@ givenergy:
       properties:
         "text": >
           {% if states('sensor.<YourEVCPowerSensor>')|int > 0  %}
-          {{ states('sensor.<YourEVCPowerSensor>')|float|round(1) if not (is_state('sensor.<YourEVCPowerSensor>','unavailable')) }} kWh
+          {{ states('sensor.<YourEVCPowerSensor>')|float|round(1) if not (is_state('sensor.<YourEVCPowerSensor>','unavailable')) }} kW
           {% else %}
           {{ "Idle" | e }}
           {% endif %}
