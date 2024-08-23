@@ -47,4 +47,58 @@ The template provides two sections which can be used either together or separate
 
 ## Examples:
 
-Todo
+### Entity Row
+This example can be used in an entities card.
+
+Dependencies: [template-entity-row](https://github.com/thomasloven/lovelace-template-entity-row)
+```
+type: conditional
+conditions:
+  - entity: person.myperson_surname
+    state_not: home
+row:
+  type: custom:template-entity-row
+  entity: person.myperson_surname
+  tap_action:
+    action: more-info
+  state: >-
+    {% from 'rich-location.jinja' import rich-location %} {{
+    get_location_stats('person.myperson_surname','device_tracker.myperson','device_tracker.myperson_app',1,
+    true) }}
+  secondary: >-
+    {% from 'rich-location.jinja' import rich-location %} {{
+    get_location_stats('person.myperson_surname','device_tracker.myperson','device_tracker.myperson_app',2,
+    true) }}
+```
+![Screenshot_4](https://github.com/user-attachments/assets/a1e264c6-5583-4ae3-bed9-6f0ea59ed917)
+
+### Mushroom Template Badge
+This example can be used to display badges. This specific example is hidden when the person is home, but that can be removed if you wish to display the card all the time.
+
+Dependencies: [Mushroom](https://github.com/piitaya/lovelace-mushroom) / [template-entity-row](https://github.com/thomasloven/lovelace-template-entity-row)
+```
+type: custom:mushroom-template-badge
+content: >
+  {% from 'rich-location.jinja' import rich-location %}
+
+  {{
+  rich-location('person.myperson_surname','device_tracker.myperson','device_tracker.myperson_app',1,
+  true) }}
+icon: mdi:mushroom
+color: ''
+picture: /api/image/serve/e2ababf21035ca6533c45a87fd571a89/512x512
+label: >-
+  {% from 'tools.jinja' import rich-location %}
+
+  {{
+  rich-location('person.myperson_surname','device_tracker.myperson','device_tracker.myperson_app',2,
+  true) }}
+entity: person.myperson_surname
+visibility:
+  - condition: state
+    entity: person.myperson_surname
+    state_not: home
+tap_action:
+  action: more-info
+```
+![Screenshot_3](https://github.com/user-attachments/assets/65dc56aa-e388-48f6-afc7-9a81a50690bb)
