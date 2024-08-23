@@ -1,16 +1,16 @@
 {"page":0,"comment":"---------- Common Entities ----------"}
-{"page":0,"id":1,"obj":"label","x":10,"y":5,"h":30,"w":62,"text":"00:00","align":0,"text_color":"#ffffff"}
-{"page":0,"id":2,"obj":"btn","x":280,"y":1,"w":30,"h":40,"text_font":"2","text":"\uE5A9","bg_opa":0,"border_width":0}
-{"page":0,"id":3,"obj":"label","x":140,"y":5,"h":30,"w":70,"text":"0.0°C","align":0,"text_color":"#ffffff"}
+{"page":0,"id":1,"obj":"label","x":10,"y":5,"h":30,"w":280,"text":"00:00","align":"left","text_color":"#ffffff"}
+{"page":0,"id":3,"obj":"label","x":10,"y":5,"h":30,"w":280,"text":"0.0°C","align":"center","text_color":"#ffffff"}
+{"page":0,"id":2,"obj":"label","x":10,"y":5,"h":30,"w":280,"text":"\uE5A9","align":"right","text_color":"#ffffff"}
 {"page":1,"comment":"---------- Page 1 ----------"}
 {"page":1,"comment":"House Icon"}
-{"page":1,"id":1,"obj":"label","x":180,"y":170,"w":120,"h":120,"text":"\uE2DC","text_font":120,"text_color":"#808000"}
+{"page":1,"id":1,"obj":"label","x":180,"y":170,"w":120,"h":120,"text":"\uE2DC","text_font":120,"text_color":"#F5F5DC"}
 {"page":1,"comment":"Grid Icon"}
 {"page":1,"id":2,"obj":"label","x":200,"y":30,"w":80,"h":80,"text":"\uF40B","text_font":80,"text_color":"#C0C0C0"}
 {"page":1,"comment":"Battery Icon"}
 {"page":1,"id":3,"obj":"label","x":200,"y":350,"w":80,"h":80,"text":"\uF2A3","text_font":80}
 {"page":1,"comment":"Sun Icon"}
-{"page":1,"id":4,"obj":"label","x":10,"y":200,"w":80,"h":80,"text":"\uE5A8","text_font":80,"text_color":"#FFD700"}
+{"page":1,"id":4,"obj":"label","x":10,"y":200,"w":80,"h":80,"text":"\uE5A8","text_font":80}
 {"page":1,"comment":"House/Grid Arrow"}
 {"page":1,"id":5,"obj":"label","x":210,"y":120,"w":60,"h":60,"text":"\uE05D","text_font":60}
 {"page":1,"comment":"Battery/House Arrow"}
@@ -20,7 +20,7 @@
 {"page":1,"comment":"Grid Power"}
 {"page":1,"id":8,"obj":"label","x":80,"y":40,"w":140,"h":30,"text":"0.0 kW","text_font":22,"align":"center"}
 {"page":1,"comment":"Current Unit Rate"}
-{"page":1,"id":9,"obj":"label","x":80,"y":70,"w":130,"h":30,"text":"0.0 p/kWh","text_font":18,"align":"right"}
+{"page":1,"id":9,"obj":"label","x":80,"y":70,"w":130,"h":30,"text":"0.0 p/kW","text_font":18,"align":"right"}
 {"page":1,"comment":"Battery Power"}
 {"page":1,"id":10,"obj":"label","x":80,"y":355,"w":120,"h":30,"text":"0 kW","text_font":24,"align":"right"}
 {"page":1,"comment":"Battery SoC"}
@@ -42,11 +42,36 @@
 {"page":1,"id":19,"obj":"label","x":80,"y":160,"w":120,"h":30,"text":"0.0 kW","text_font":24,"align":"center"}
 {"page":1,"comment":"EVC SoC"}
 {"page":1,"id":20,"obj":"label","x":10,"y":170,"w":80,"h":80,"text":"0%","text_font":24,"align":"center"}
+{"page":2,"comment":"---------- Page 2 ----------"}
+{"page":2,"id":1,"obj":"img","src":"L:/kia-logo.png","auto_size":0,"w":320,"x":0,"y":30}
+{"page":2,"id":2,"obj":"label","x":5,"y":110,"h":30,"w":200,"text":"Page 2, Line 1","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":3,"obj":"label","x":5,"y":140,"h":30,"w":200,"text":"Page 2, Line 2","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":4,"obj":"label","x":5,"y":170,"h":30,"w":200,"text":"Page 2, Line 3","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":5,"obj":"label","x":5,"y":200,"h":30,"w":200,"text":"Page 2, Line 4","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":6,"obj":"label","x":5,"y":230,"h":30,"w":200,"text":"Page 2, Line 5","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":7,"obj":"label","x":5,"y":260,"h":30,"w":200,"text":"Page 2, Line 6","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":8,"obj":"label","x":5,"y":290,"h":30,"w":200,"text":"Page 2, Line 7","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":9,"obj":"label","x":5,"y":320,"h":30,"w":200,"text":"Page 2, Line 8","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":10,"obj":"label","x":5,"y":350,"h":30,"w":200,"text":"Page 2, Line 9","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":11,"obj":"label","x":5,"y":380,"h":30,"w":200,"text":"Page 2, Line 10","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":12,"obj":"label","x":5,"y":410,"h":30,"w":200,"text":"Page 2, Line 11","align":0,"bg_color":"#2C3E50"}
+{"page":2,"comment":"---------- Page 3 ----------"}
+{"page":3,"id":1,"obj":"label","x":5,"y":50,"h":30,"w":200,"text":"Page 3, Line 1","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":2,"obj":"label","x":5,"y":80,"h":30,"w":200,"text":"Page 3, Line 2","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":3,"obj":"label","x":5,"y":110,"h":30,"w":200,"text":"Page 3, Line 3","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":4,"obj":"label","x":5,"y":140,"h":30,"w":200,"text":"Page 3, Line 4","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":5,"obj":"label","x":5,"y":170,"h":30,"w":200,"text":"Page 3, Line 5","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":6,"obj":"label","x":5,"y":200,"h":30,"w":200,"text":"Page 3, Line 6","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":7,"obj":"label","x":5,"y":230,"h":30,"w":200,"text":"Page 3, Line 7","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":8,"obj":"label","x":5,"y":260,"h":30,"w":200,"text":"Page 3, Line 8","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":9,"obj":"label","x":5,"y":290,"h":30,"w":200,"text":"Page 3, Line 9","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":10,"obj":"label","x":5,"y":320,"h":30,"w":200,"text":"Page 3, Line 10","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":11,"obj":"label","x":5,"y":350,"h":30,"w":200,"text":"Page 3, Line 11","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":12,"obj":"label","x":5,"y":380,"h":30,"w":200,"text":"Page 3, Line 12","align":0,"bg_color":"#2C3E50"}
+{"page":3,"id":23,"obj":"label","x":5,"y":410,"h":30,"w":200,"text":"Page 3, Line 13","align":0,"bg_color":"#2C3E50"}
 {"comment":"---------- All Pages ----------"}
 {"page":0,"id":7,"obj":"btn","action":"prev","x":0,"y":448,"w":106,"h":32,"text":"\uE141","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":32}
 {"page":0,"id":8,"obj":"btn","action":"back","x":106,"y":448,"w":108,"h":32,"text":"\uE2DC","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":24}
 {"page":0,"id":9,"obj":"btn","action":"next","x":214,"y":448,"w":106,"h":32,"text":"\uE142","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":32}
-
-{"comment":"---------- Limit page prev/next between 1 and 4 ----------"}
-{"page":1,"id":0,"prev":1}
-{"page":1,"id":0,"next":1}
+{"page":1,"id":0,"prev":3}
+{"page":3,"id":0,"next":1}
