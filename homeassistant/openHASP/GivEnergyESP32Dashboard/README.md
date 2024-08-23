@@ -27,7 +27,7 @@ There are enough guides on the internet for me to not document how to set up any
 
 ![image](https://github.com/user-attachments/assets/bb24ec39-18ed-4efd-832c-7433ecd5b0dd)
 ![image](https://github.com/user-attachments/assets/72365d5c-c1c8-4403-91a6-1d9a22fac709)
-
+![image](https://github.com/user-attachments/assets/9e6a0561-e7fb-4ec8-baa0-c6d2deda5be0)
 
 ## 3D Printed Case:
 
