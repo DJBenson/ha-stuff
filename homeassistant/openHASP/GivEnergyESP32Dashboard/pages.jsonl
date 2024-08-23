@@ -1,48 +1,47 @@
 {"page":0,"comment":"---------- Common Entities ----------"}
 {"page":0,"id":1,"obj":"label","x":10,"y":5,"h":30,"w":62,"text":"00:00","align":0,"text_color":"#ffffff"}
-{"page":0,"id":2,"obj":"btn","x":280,"y":1,"w":30,"h":40,"text_font":"2","text":"\uE5A9","text_color":"gray","bg_opa":0,"border_width":0}
+{"page":0,"id":2,"obj":"btn","x":280,"y":1,"w":30,"h":40,"text_font":"2","text":"\uE5A9","bg_opa":0,"border_width":0}
 {"page":0,"id":3,"obj":"label","x":140,"y":5,"h":30,"w":70,"text":"0.0°C","align":0,"text_color":"#ffffff"}
-
 {"page":1,"comment":"---------- Page 1 ----------"}
 {"page":1,"comment":"House Icon"}
-{"page":1,"id":201,"obj":"label","x":180,"y":170,"w":120,"h":120,"text":"\uE2DC","text_font":120}
+{"page":1,"id":1,"obj":"label","x":180,"y":170,"w":120,"h":120,"text":"\uE2DC","text_font":120,"text_color":"#808000"}
 {"page":1,"comment":"Grid Icon"}
-{"page":1,"id":202,"obj":"label","x":200,"y":30,"w":80,"h":80,"text":"\uF40B","text_font":80}
+{"page":1,"id":2,"obj":"label","x":200,"y":30,"w":80,"h":80,"text":"\uF40B","text_font":80,"text_color":"#C0C0C0"}
 {"page":1,"comment":"Battery Icon"}
-{"page":1,"id":203,"obj":"label","x":200,"y":350,"w":80,"h":80,"text":"\uF2A3","text_font":80}
+{"page":1,"id":3,"obj":"label","x":200,"y":350,"w":80,"h":80,"text":"\uF2A3","text_font":80}
 {"page":1,"comment":"Sun Icon"}
-{"page":1,"id":204,"obj":"label","x":10,"y":200,"w":80,"h":80,"text":"\uE5A8","text_font":80}
+{"page":1,"id":4,"obj":"label","x":10,"y":200,"w":80,"h":80,"text":"\uE5A8","text_font":80,"text_color":"#FFD700"}
 {"page":1,"comment":"House/Grid Arrow"}
-{"page":1,"id":205,"obj":"label","x":210,"y":120,"w":60,"h":60,"text":"\uE05D","text_font":60}
+{"page":1,"id":5,"obj":"label","x":210,"y":120,"w":60,"h":60,"text":"\uE05D","text_font":60}
 {"page":1,"comment":"Battery/House Arrow"}
-{"page":1,"id":206,"obj":"label","x":210,"y":290,"w":60,"h":60,"text":"\uE05D","text_font":60}
+{"page":1,"id":6,"obj":"label","x":210,"y":290,"w":60,"h":60,"text":"\uE05D","text_font":60}
 {"page":1,"comment":"Solar Arrow"}
-{"page":1,"id":207,"obj":"label","x":110,"y":210,"w":80,"h":80,"text":"\uE054","text_font":60}
+{"page":1,"id":7,"obj":"label","x":110,"y":210,"w":80,"h":80,"text":"\uE054","text_font":60}
 {"page":1,"comment":"Grid Power"}
-{"page":1,"id":208,"obj":"label","x":80,"y":40,"w":120,"h":30,"text":"0.0 kWh","text_font":24,"align":"right"}
+{"page":1,"id":8,"obj":"label","x":80,"y":40,"w":140,"h":30,"text":"0.0 kWh","text_font":22,"align":"center"}
 {"page":1,"comment":"Current Unit Rate"}
-{"page":1,"id":209,"obj":"label","x":80,"y":70,"w":130,"h":30,"text":"0.0 p/kWh","text_font":18,"align":"right"}
+{"page":1,"id":9,"obj":"label","x":80,"y":70,"w":130,"h":30,"text":"0.0 p/kWh","text_font":18,"align":"right"}
 {"page":1,"comment":"Battery Power"}
-{"page":1,"id":210,"obj":"label","x":80,"y":355,"w":120,"h":30,"text":"0 kWh","text_font":24,"align":"right"}
+{"page":1,"id":10,"obj":"label","x":80,"y":355,"w":120,"h":30,"text":"0 kWh","text_font":24,"align":"right"}
 {"page":1,"comment":"Battery SoC"}
-{"page":1,"id":211,"obj":"label","x":80,"y":380,"w":120,"h":30,"text":"0%","text_font":24,"align":"right"}
+{"page":1,"id":11,"obj":"label","x":80,"y":380,"w":120,"h":30,"text":"0%","text_font":24,"align":"right"}
 {"page":1,"comment":"Battery Status"}
-{"page":1,"id":212,"obj":"label","x":80,"y":405,"w":120,"h":30,"text":"Status","text_font":24,"align":"right"}
+{"page":1,"id":12,"obj":"label","x":80,"y":405,"w":120,"h":30,"text":"Status","text_font":24,"align":"right"}
 {"page":1,"comment":"Solar Power"}
-{"page":1,"id":213,"obj":"label","x":50,"y":270,"w":120,"h":30,"text":"0 w","text_font":24,"align":"right"}
+{"page":1,"id":13,"obj":"label","x":80,"y":270,"w":120,"h":30,"text":"0.0 kWh","text_font":24,"align":"center"}
 {"page":1,"comment":"House Load"}
-{"page":1,"id":214,"obj":"label","x":210,"y":209,"w":60,"h":30,"text":"0.0","text_font":24,"align":"center","text_color":"#000000"}
+{"page":1,"id":14,"obj":"label","x":210,"y":209,"w":60,"h":30,"text":"0.0","text_font":24,"align":"center","text_color":"#000000"}
 {"page":1,"comment":"House Load Label"}
-{"page":1,"id":215,"obj":"label","x":210,"y":233,"w":60,"h":30,"text":"kWh","text_font":14,"align":"center","text_color":"#000000"}
-{"page":1,"id":216,"obj":"img","src":"L:/gelogo120x26.png","auto_size":0,"w":120,"x":20,"y":320}
+{"page":1,"id":15,"obj":"label","x":210,"y":233,"w":60,"h":30,"text":"kWh","text_font":14,"align":"center","text_color":"#000000"}
+{"page":1,"id":16,"obj":"img","src":"L:/gelogo120x26.png","auto_size":0,"w":120,"x":20,"y":320}
 {"page":1,"comment":"EVC Icon"}
-{"page":1,"id":217,"obj":"label","x":15,"y":90,"w":80,"h":80,"text":"\uE5F1","text_font":80}
+{"page":1,"id":17,"obj":"label","x":15,"y":90,"w":80,"h":80,"text":"\uE5F1","text_font":80}
 {"page":1,"comment":"EVC Arrow"}
-{"page":1,"id":218,"obj":"label","x":110,"y":100,"w":80,"h":80,"text":"\uE04D","text_font":60}
+{"page":1,"id":18,"obj":"label","x":110,"y":100,"w":80,"h":80,"text":"\uE04D","text_font":60}
 {"page":1,"comment":"EV Power"}
-{"page":1,"id":219,"obj":"label","x":80,"y":160,"w":120,"h":30,"text":"0.00 w","text_font":24,"align":"center"}
+{"page":1,"id":19,"obj":"label","x":80,"y":160,"w":120,"h":30,"text":"0.0 kWh","text_font":24,"align":"center"}
 {"page":1,"comment":"EVC SoC"}
-{"page":1,"id":220,"obj":"label","x":10,"y":170,"w":80,"h":80,"text":"0%","text_font":24,"align":"center"}
+{"page":1,"id":20,"obj":"label","x":10,"y":170,"w":80,"h":80,"text":"0%","text_font":24,"align":"center"}
 {"comment":"---------- All Pages ----------"}
 {"page":0,"id":7,"obj":"btn","action":"prev","x":0,"y":448,"w":106,"h":32,"text":"\uE141","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":32}
 {"page":0,"id":8,"obj":"btn","action":"back","x":106,"y":448,"w":108,"h":32,"text":"\uE2DC","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":24}
