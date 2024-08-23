@@ -18,28 +18,28 @@
 {"page":1,"comment":"Solar Arrow"}
 {"page":1,"id":7,"obj":"label","x":110,"y":210,"w":80,"h":80,"text":"\uE054","text_font":60}
 {"page":1,"comment":"Grid Power"}
-{"page":1,"id":8,"obj":"label","x":80,"y":40,"w":140,"h":30,"text":"0.0 kWh","text_font":22,"align":"center"}
+{"page":1,"id":8,"obj":"label","x":80,"y":40,"w":140,"h":30,"text":"0.0 kW","text_font":22,"align":"center"}
 {"page":1,"comment":"Current Unit Rate"}
 {"page":1,"id":9,"obj":"label","x":80,"y":70,"w":130,"h":30,"text":"0.0 p/kWh","text_font":18,"align":"right"}
 {"page":1,"comment":"Battery Power"}
-{"page":1,"id":10,"obj":"label","x":80,"y":355,"w":120,"h":30,"text":"0 kWh","text_font":24,"align":"right"}
+{"page":1,"id":10,"obj":"label","x":80,"y":355,"w":120,"h":30,"text":"0 kW","text_font":24,"align":"right"}
 {"page":1,"comment":"Battery SoC"}
 {"page":1,"id":11,"obj":"label","x":80,"y":380,"w":120,"h":30,"text":"0%","text_font":24,"align":"right"}
 {"page":1,"comment":"Battery Status"}
 {"page":1,"id":12,"obj":"label","x":80,"y":405,"w":120,"h":30,"text":"Status","text_font":24,"align":"right"}
 {"page":1,"comment":"Solar Power"}
-{"page":1,"id":13,"obj":"label","x":80,"y":270,"w":120,"h":30,"text":"0.0 kWh","text_font":24,"align":"center"}
+{"page":1,"id":13,"obj":"label","x":80,"y":270,"w":120,"h":30,"text":"0.0 kW","text_font":24,"align":"center"}
 {"page":1,"comment":"House Load"}
 {"page":1,"id":14,"obj":"label","x":210,"y":209,"w":60,"h":30,"text":"0.0","text_font":24,"align":"center","text_color":"#000000"}
 {"page":1,"comment":"House Load Label"}
-{"page":1,"id":15,"obj":"label","x":210,"y":233,"w":60,"h":30,"text":"kWh","text_font":14,"align":"center","text_color":"#000000"}
+{"page":1,"id":15,"obj":"label","x":210,"y":233,"w":60,"h":30,"text":"kW","text_font":14,"align":"center","text_color":"#000000"}
 {"page":1,"id":16,"obj":"img","src":"L:/gelogo120x26.png","auto_size":0,"w":120,"x":20,"y":320}
 {"page":1,"comment":"EVC Icon"}
 {"page":1,"id":17,"obj":"label","x":15,"y":90,"w":80,"h":80,"text":"\uE5F1","text_font":80}
 {"page":1,"comment":"EVC Arrow"}
 {"page":1,"id":18,"obj":"label","x":110,"y":100,"w":80,"h":80,"text":"\uE04D","text_font":60}
 {"page":1,"comment":"EV Power"}
-{"page":1,"id":19,"obj":"label","x":80,"y":160,"w":120,"h":30,"text":"0.0 kWh","text_font":24,"align":"center"}
+{"page":1,"id":19,"obj":"label","x":80,"y":160,"w":120,"h":30,"text":"0.0 kW","text_font":24,"align":"center"}
 {"page":1,"comment":"EVC SoC"}
 {"page":1,"id":20,"obj":"label","x":10,"y":170,"w":80,"h":80,"text":"0%","text_font":24,"align":"center"}
 {"comment":"---------- All Pages ----------"}
