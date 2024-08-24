@@ -25,9 +25,13 @@ There are enough guides on the internet for me to not document how to set up any
 
 * This setup assumes you have a GivEnergy setup, a GivEnergy EV Charger and a car that provides sensors for the charging power and state of charge. If you don't have substitutes for these sensors, you need to remove the lines from the openhasp.yaml file which relate to those entities as well as removing them from pages.jsonl. For example if you wish to remove the EV battery state of charge and charging power, you can remove line 38-45 in pages.jasonl and lines 912 to 931 in openhasp.yaml.
 
-![image](https://github.com/user-attachments/assets/bb24ec39-18ed-4efd-832c-7433ecd5b0dd)
-![image](https://github.com/user-attachments/assets/72365d5c-c1c8-4403-91a6-1d9a22fac709)
-![image](https://github.com/user-attachments/assets/9e6a0561-e7fb-4ec8-baa0-c6d2deda5be0)
+### Day Time
+
+### Night Time
+![image](https://github.com/user-attachments/assets/be1c84ca-b576-4463-8232-4f5e5e415522)
+![image](https://github.com/user-attachments/assets/651423d1-d590-4940-9893-695c4777bf43)
+![image](https://github.com/user-attachments/assets/818c8282-ea7f-428f-865d-ca82311b79ab)
+
 
 ## 3D Printed Case:
 
