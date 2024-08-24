@@ -34,6 +34,7 @@ There are enough guides on the internet for me to not document how to set up any
 ![image](https://github.com/user-attachments/assets/be1c84ca-b576-4463-8232-4f5e5e415522)
 ![image](https://github.com/user-attachments/assets/651423d1-d590-4940-9893-695c4777bf43)
 ![image](https://github.com/user-attachments/assets/818c8282-ea7f-428f-865d-ca82311b79ab)
+![image](https://github.com/user-attachments/assets/6179f44c-1ceb-4a7a-982a-ea9e0ae0bd03)
 
 
 ## 3D Printed Case:
