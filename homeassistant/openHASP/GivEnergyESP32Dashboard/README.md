@@ -28,6 +28,7 @@ There are enough guides on the internet for me to not document how to set up any
 ### Day Time
 ![image](https://github.com/user-attachments/assets/1b5aa8c0-bf95-4c75-a616-52da42555605)
 ![image](https://github.com/user-attachments/assets/fb12a0b2-8dec-4203-8837-5d67353ad497)
+![image](https://github.com/user-attachments/assets/2ce00172-75f7-4fc3-b4ff-40f9a2ac79ce)
 
 ### Night Time
 ![image](https://github.com/user-attachments/assets/be1c84ca-b576-4463-8232-4f5e5e415522)
