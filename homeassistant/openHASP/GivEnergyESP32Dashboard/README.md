@@ -4,7 +4,9 @@ This directory contains the openHASP jsonl file and the yaml file for Home Assis
 ## Pre-requisites:
 
 * [A WT32-SC01 or WT32-SC01-Plus device](https://aliexpress.com/item/1005005561671980.html?gatewayAdapt=glo2deu)
-* A [GivEnergy](https://givenergy.co.uk/) battery storage system
+* A [GivEnergy](https://givenergy.co.uk/) battery storage system (or other system which provides the requisite entities)
+* A [GivEnergy](https://givenergy.co.uk/) EV chartger (or other charger which provides the requisite entities)
+* An EV which provides data such as state of charge (I have a Kia EV6 so use [github.com/Hyundai-Kia-Connect/kia_uvo](https://github.com/Hyundai-Kia-Connect/kia_uvo)
 * [Home Assistant](https://www.home-assistant.io/)
 * [HACS](https://hacs.xyz/)
 * [GivTCP](https://github.com/britkat1980/giv_tcp)
