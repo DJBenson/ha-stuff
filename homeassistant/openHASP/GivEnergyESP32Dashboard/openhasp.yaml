@@ -19,7 +19,7 @@ givenergy:
           {% endif %}
     - obj: "p0b3" # outside temperature
       properties:
-        "text": "{{ states('sensor.average_outside_temperature_smoothed')|round(1) }}°C"
+        "text": "{{ states('sensor.<YourOutsideTemperatureSensor>')|round(1) }}°C"
     - obj: "p1b3" # battery soc icon
       properties:
         "text_color": >
