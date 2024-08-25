@@ -4,71 +4,70 @@
 {"page":0,"id":2,"obj":"label","x":10,"y":5,"h":30,"w":280,"text":"\uE5A9","align":"right","text_color":"#ffffff"}
 {"page":1,"comment":"---------- Page 1 ----------"}
 {"page":1,"comment":"House Icon"}
-{"page":1,"id":1,"obj":"label","x":180,"y":170,"w":120,"h":120,"text":"\uE2DC","text_font":120,"text_color":"#F5F5DC"}
+{"page":1,"id":1,"obj":"label","x":200,"y":170,"w":120,"h":120,"text":"\uE2DC","text_font":120,"text_color":"#F5F5DC"}
 {"page":1,"comment":"Grid Icon"}
-{"page":1,"id":2,"obj":"label","x":200,"y":30,"w":80,"h":80,"text":"\uF40B","text_font":80,"text_color":"#C0C0C0"}
+{"page":1,"id":2,"obj":"img","src":"L:/pylon.png","auto_size":0,"x":220,"y":40,"w":70}
 {"page":1,"comment":"Battery Icon"}
-{"page":1,"id":3,"obj":"label","x":200,"y":350,"w":80,"h":80,"text":"\uF2A3","text_font":80}
+{"page":1,"id":3,"obj":"label","x":220,"y":350,"w":80,"h":80,"text":"\uF2A3","text_font":80}
 {"page":1,"comment":"Sun Icon"}
 {"page":1,"id":4,"obj":"label","x":10,"y":200,"w":80,"h":80,"text":"\uE5A8","text_font":80}
 {"page":1,"comment":"House/Grid Arrow"}
-{"page":1,"id":5,"obj":"label","x":210,"y":120,"w":60,"h":60,"text":"\uE05D","text_font":60}
+{"page":1,"id":5,"obj":"label","x":230,"y":120,"w":60,"h":60,"text":"\uE05D","text_font":60}
 {"page":1,"comment":"Battery/House Arrow"}
-{"page":1,"id":6,"obj":"label","x":210,"y":290,"w":60,"h":60,"text":"\uE05D","text_font":60}
+{"page":1,"id":6,"obj":"label","x":230,"y":290,"w":60,"h":60,"text":"\uE05D","text_font":60}
 {"page":1,"comment":"Solar Arrow"}
-{"page":1,"id":7,"obj":"label","x":110,"y":210,"w":80,"h":80,"text":"\uE054","text_font":60}
+{"page":1,"id":7,"obj":"label","x":120,"y":210,"w":80,"h":80,"text":"\uE054","text_font":60}
 {"page":1,"comment":"Grid Power"}
-{"page":1,"id":8,"obj":"label","x":80,"y":40,"w":140,"h":30,"text":"0.0 kW","text_font":22,"align":"center"}
+{"page":1,"id":8,"obj":"label","x":10,"y":40,"w":140,"h":30,"text":"0.0 kW","text_font":22,"align":"left"}
 {"page":1,"comment":"Current Unit Rate"}
-{"page":1,"id":9,"obj":"label","x":80,"y":70,"w":130,"h":30,"text":"0.0 p/kW","text_font":18,"align":"right"}
+{"page":1,"id":9,"obj":"label","x":10,"y":70,"w":130,"h":30,"text":"0.0 p/kW","text_font":18,"align":"left"}
 {"page":1,"comment":"Battery Power"}
-{"page":1,"id":10,"obj":"label","x":80,"y":355,"w":120,"h":30,"text":"0 kW","text_font":24,"align":"right"}
-{"page":1,"comment":"Battery SoC"}
-{"page":1,"id":11,"obj":"label","x":80,"y":380,"w":120,"h":30,"text":"0%","text_font":24,"align":"right"}
+{"page":1,"id":10,"obj":"label","x":100,"y":384,"w":120,"h":30,"text":"0 kW","text_font":24,"align":"right"}
 {"page":1,"comment":"Battery Status"}
-{"page":1,"id":12,"obj":"label","x":80,"y":405,"w":120,"h":30,"text":"Status","text_font":24,"align":"right"}
+{"page":1,"id":12,"obj":"label","x":100,"y":355,"w":120,"h":30,"text":"Status","text_font":24,"align":"right"}
+{"page":1,"comment":"Battery SoC"}
+{"page":1,"id":11,"obj":"label","x":100,"y":410,"w":120,"h":30,"text":"0%","text_font":24,"align":"right"}
 {"page":1,"comment":"Solar Power"}
-{"page":1,"id":13,"obj":"label","x":80,"y":270,"w":120,"h":30,"text":"0.0 kW","text_font":24,"align":"center"}
+{"page":1,"id":13,"obj":"label","x":100,"y":270,"w":120,"h":30,"text":"0.0 kW","text_font":24,"align":"center"}
 {"page":1,"comment":"House Load"}
-{"page":1,"id":14,"obj":"label","x":210,"y":209,"w":60,"h":30,"text":"0.0","text_font":24,"align":"center","text_color":"#000000"}
+{"page":1,"id":14,"obj":"label","x":230,"y":209,"w":60,"h":30,"text":"0.0","text_font":24,"align":"center","text_color":"#000000"}
 {"page":1,"comment":"House Load Label"}
-{"page":1,"id":15,"obj":"label","x":210,"y":233,"w":60,"h":30,"text":"kW","text_font":14,"align":"center","text_color":"#000000"}
-{"page":1,"id":16,"obj":"img","src":"L:/gelogo120x26.png","auto_size":0,"w":120,"x":20,"y":320}
+{"page":1,"id":15,"obj":"label","x":230,"y":233,"w":60,"h":30,"text":"kW","text_font":14,"align":"center","text_color":"#000000"}
+{"page":1,"id":16,"obj":"img","src":"L:/gelogo120x26.png","auto_size":0,"w":120,"x":10,"y":415}
 {"page":1,"comment":"EVC Icon"}
 {"page":1,"id":17,"obj":"label","x":15,"y":90,"w":80,"h":80,"text":"\uE5F1","text_font":80}
 {"page":1,"comment":"EVC Arrow"}
-{"page":1,"id":18,"obj":"label","x":110,"y":100,"w":80,"h":80,"text":"\uE04D","text_font":60}
+{"page":1,"id":18,"obj":"label","x":120,"y":100,"w":80,"h":80,"text":"\uE04D","text_font":60}
 {"page":1,"comment":"EV Power"}
-{"page":1,"id":19,"obj":"label","x":80,"y":160,"w":120,"h":30,"text":"0.0 kW","text_font":24,"align":"center"}
+{"page":1,"id":19,"obj":"label","x":100,"y":160,"w":120,"h":30,"text":"0.0 kW","text_font":24,"align":"center"}
 {"page":1,"comment":"EVC SoC"}
 {"page":1,"id":20,"obj":"label","x":10,"y":170,"w":80,"h":80,"text":"0%","text_font":24,"align":"center"}
 {"page":2,"comment":"---------- Page 2 ----------"}
-{"page":2,"id":1,"obj":"img","src":"L:/kia-logo.png","auto_size":0,"w":320,"x":0,"y":30}
-{"page":2,"id":2,"obj":"label","x":5,"y":110,"h":30,"w":200,"text":"Page 2, Line 1","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":3,"obj":"label","x":5,"y":140,"h":30,"w":200,"text":"Page 2, Line 2","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":4,"obj":"label","x":5,"y":170,"h":30,"w":200,"text":"Page 2, Line 3","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":5,"obj":"label","x":5,"y":200,"h":30,"w":200,"text":"Page 2, Line 4","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":6,"obj":"label","x":5,"y":230,"h":30,"w":200,"text":"Page 2, Line 5","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":7,"obj":"label","x":5,"y":260,"h":30,"w":200,"text":"Page 2, Line 6","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":8,"obj":"label","x":5,"y":290,"h":30,"w":200,"text":"Page 2, Line 7","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":9,"obj":"label","x":5,"y":320,"h":30,"w":200,"text":"Page 2, Line 8","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":10,"obj":"label","x":5,"y":350,"h":30,"w":200,"text":"Page 2, Line 9","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":11,"obj":"label","x":5,"y":380,"h":30,"w":200,"text":"Page 2, Line 10","align":0,"bg_color":"#2C3E50"}
-{"page":2,"id":12,"obj":"label","x":5,"y":410,"h":30,"w":200,"text":"Page 2, Line 11","align":0,"bg_color":"#2C3E50"}
-{"page":2,"comment":"---------- Page 3 ----------"}
-{"page":3,"id":1,"obj":"label","x":5,"y":50,"h":30,"w":200,"text":"Page 3, Line 1","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":2,"obj":"label","x":5,"y":80,"h":30,"w":200,"text":"Page 3, Line 2","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":3,"obj":"label","x":5,"y":110,"h":30,"w":200,"text":"Page 3, Line 3","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":4,"obj":"label","x":5,"y":140,"h":30,"w":200,"text":"Page 3, Line 4","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":5,"obj":"label","x":5,"y":170,"h":30,"w":200,"text":"Page 3, Line 5","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":6,"obj":"label","x":5,"y":200,"h":30,"w":200,"text":"Page 3, Line 6","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":7,"obj":"label","x":5,"y":230,"h":30,"w":200,"text":"Page 3, Line 7","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":8,"obj":"label","x":5,"y":260,"h":30,"w":200,"text":"Page 3, Line 8","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":9,"obj":"label","x":5,"y":290,"h":30,"w":200,"text":"Page 3, Line 9","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":10,"obj":"label","x":5,"y":320,"h":30,"w":200,"text":"Page 3, Line 10","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":11,"obj":"label","x":5,"y":350,"h":30,"w":200,"text":"Page 3, Line 11","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":12,"obj":"label","x":5,"y":380,"h":30,"w":200,"text":"Page 3, Line 12","align":0,"bg_color":"#2C3E50"}
-{"page":3,"id":23,"obj":"label","x":5,"y":410,"h":30,"w":200,"text":"Page 3, Line 13","align":0,"bg_color":"#2C3E50"}
+{"page":2,"id":1,"obj":"img","src":"L:/gelogo120x26.png","x":105,"y":65,"align":"center","zoom":360}
+{"page":2,"id":2,"obj":"label","x":5,"y":105,"h":30,"w":310,"text":"Page 2, Line 1","align":"center","bg_color":"#2C3E50"}
+{"page":2,"id":3,"obj":"label","x":5,"y":140,"h":30,"w":310,"text":"Page 2, Line 2","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":4,"obj":"label","x":5,"y":170,"h":30,"w":310,"text":"Page 2, Line 3","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":5,"obj":"label","x":5,"y":200,"h":30,"w":310,"text":"Page 2, Line 4","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":6,"obj":"label","x":5,"y":230,"h":30,"w":310,"text":"Page 2, Line 5","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":7,"obj":"label","x":5,"y":260,"h":30,"w":310,"text":"Page 2, Line 6","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":8,"obj":"label","x":5,"y":290,"h":30,"w":310,"text":"Page 2, Line 7","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":9,"obj":"label","x":5,"y":320,"h":30,"w":310,"text":"Page 2, Line 8","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":10,"obj":"label","x":5,"y":350,"h":30,"w":310,"text":"Page 2, Line 9","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":11,"obj":"label","x":5,"y":380,"h":30,"w":310,"text":"Page 2, Line 10","align":"left","bg_color":"#2C3E50"}
+{"page":2,"id":12,"obj":"label","x":5,"y":410,"h":30,"w":310,"text":"Page 2, Line 11","align":"left","bg_color":"#2C3E50"}
+{"page":3,"comment":"---------- Page 3 ----------"}
+{"page":3,"id":1,"obj":"img","src":"L:/gelogo120x26.png","x":105,"y":65,"align":"center","zoom":360}
+{"page":3,"id":2,"obj":"label","x":5,"y":105,"h":30,"w":310,"text":"Page 3, Line 1","align":"center","bg_color":"#2C3E50"}
+{"page":3,"id":3,"obj":"label","x":5,"y":140,"h":30,"w":310,"text":"Page 3, Line 2","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":4,"obj":"label","x":5,"y":170,"h":30,"w":310,"text":"Page 3, Line 3","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":5,"obj":"label","x":5,"y":200,"h":30,"w":310,"text":"Page 3, Line 4","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":6,"obj":"label","x":5,"y":230,"h":30,"w":310,"text":"Page 3, Line 5","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":7,"obj":"label","x":5,"y":260,"h":30,"w":310,"text":"Page 3, Line 6","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":8,"obj":"label","x":5,"y":290,"h":30,"w":310,"text":"Page 3, Line 7","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":9,"obj":"label","x":5,"y":320,"h":30,"w":310,"text":"Page 3, Line 8","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":10,"obj":"label","x":5,"y":350,"h":30,"w":310,"text":"Page 3, Line 9","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":11,"obj":"label","x":5,"y":380,"h":30,"w":310,"text":"Page 3, Line 10","align":"left","bg_color":"#2C3E50"}
+{"page":3,"id":12,"obj":"label","x":5,"y":410,"h":30,"w":310,"text":"Page 3, Line 11","align":"left","bg_color":"#2C3E50"}
 {"comment":"---------- All Pages ----------"}
 {"page":0,"id":7,"obj":"btn","action":"prev","x":0,"y":448,"w":106,"h":32,"text":"\uE141","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":32}
 {"page":0,"id":8,"obj":"btn","action":"back","x":106,"y":448,"w":108,"h":32,"text":"\uE2DC","text_color":"#FFFFFF","radius":0,"border_side":0,"text_font":24}
