@@ -19,6 +19,18 @@ There are enough guides on the internet for me to not document how to set up any
 * Copy/paste the [jsonl](./pages.jsonl) file to the openHASP web interface for your target device
 * Copy/paste the [yaml](./openhasp.yaml) file to the relevant place in Home Assistant - I have a seperate openhasp.yaml file which is included in my configuration.yaml file - YMMV
 * Replace all placeholders with the correct entities for your setup (there are placeholders for the outdoor temperature sensor, your WT32-SC01 device name, your GivEnergy serial, your Octopus sensors plus sensors for the EV charger and EV state of charge).
+  * \<YourDevice>: The device name of the WT32-SC01
+  * \<YourOutsideTemperatureSensor>: Entity providing outside temperature - can be a local sensor or from a weather entity
+  * \<YourHomeBatterySoCSensor>: Entity providing the state of charge (in %) of your home battery setup
+  * \<YourPVPowerSensor>: Entity providing the current output of your PV setup (in watts)
+  * \<YourImportPowerSensor>: Entity providing the grid import power (in watts)
+  * \<YourExportPowerSensor>: Entity providing the grid export power (in watts)
+  * \<YourHomeBatteryPowerSensor>: Entity providing the current power from/to the home battery (in watts)
+  * \<YourGridPowerSensor>: Entity providing the grid power (both import/export) (in watts)
+  * \<YourCurrentElectricityUnitRateSensor>: Entity providing the current unit rate for electricity consumemed
+  * \<YourLoadPowerSensor>: Entity providing the current house load demand (in watts)
+  * \<YourEVSoCSensor>: Entity providing the current SoC of your EV battery
+  * \<YourEVChargerPowerSensor>: Entity providing the current power of your EV charger (in kW)
 * Restart Home Assistant
 
 ## Customising:
