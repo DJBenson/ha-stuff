@@ -1,7 +1,7 @@
 # Octopus Energy Free Electricity Sensor for Home Assistant
-Octopus Energy have started a nationwide scheme of offering free electricity slots to customers - they have not (yet!) however added those slots to their API so there is (currently) no way to trigger automations on the back of them. This walkthrough aims to address that using the Home Assistant IMAP integration and a (very) fragile template sensor - see [below](https://github.com/DJBenson/ha-stuff/blob/main/homeassistant/free_electricity.md#caveats) for more on that.
+Octopus Energy have started a nationwide scheme of offering free electricity slots to customers - they have not (yet!) however added those slots to their API so there is (currently) no way to trigger automations on the back of them. This walkthrough aims to address that using the Home Assistant IMAP integration and a (very) fragile collection of input_datetime fields - see [below](https://github.com/DJBenson/ha-stuff/blob/main/homeassistant/free_electricity.md#caveats) for more on that.
 
-**This is not the entire solution, it simply creates a sensor on which to base your solution which is not covered here as people will have different requirements.**
+**This is not the entire solution, it simply creates two input_datetimes (one for the start of the event and one for the end) on which to base your solution which is not covered here as people will have different requirements.**
 
 ## Pre-requistes
 * Home Assistant
@@ -28,115 +28,23 @@ You will now have a new entry in your integrations which will pick up emails fro
 
 If your email server is not PUSH-enabled (or it's unreliable) click on "Configure" on your IMAP entity and toggle "Enable Push-IMAP if the server supports it. Turn off if Push-IMAP updates are unreliable" to suit.
 
-### Configure the template sensor
-Copy/paste the below into your editor of choice - if you are using split-configuration then amend as appropriate (i.e. remove the sensor: tag and back-space the rest of the config).
-```
-sensor:
-  - trigger:
-      - platform: event
-        event_type: "imap_content"
-        id: "custom_event"
-    sensor:
-      - name: octopus_free_electricity
-        state: >
-          {% set date_string = trigger.event.data['text'] | regex_findall_index('Fill your boots on ([A-Za-z]+ \d+ [A-Za-z]+):') %}
-          {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
-          {% if date_string and time_string %}
-            {% set current_year = now().year %}
-            {% set event_datetime = date_string + ' ' + current_year|string + ', ' + time_string[0] + '-' + time_string[1] + time_string[2] %}
-          {% else %}
-            {% set event_datetime = 'None' %}
-          {% endif %}
-          {{ event_datetime }}
-        attributes:
-          event_date: >
-            {% set date_string = trigger.event.data['text'] | regex_findall_index('Fill your boots on ([A-Za-z]+ \d+ [A-Za-z]+):') %}        
-            {% if date_string %}
-              {% set current_year = now().year %}
-              {% set date_object = strptime(date_string ~ ' ' ~ current_year|string, '%A %d %B %Y') %}
-              {{ date_object.strftime('%Y-%m-%d') }}
-            {% else %}
-              None
-            {% endif %}
-            {{ event_date }}
-          event_start_time: >
-            {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
-            {% if time_string %}
-              {% set start_hour = time_string[0] | int %}
-              {% set period = time_string[2] %}
-              {% if period == 'pm' and start_hour < 12 %}
-                {% set start_hour_24 = start_hour + 12 %}
-              {% elif period == 'am' and start_hour == 12 %}
-                {% set start_hour_24 = 0 %}
-              {% else %}
-                {% set start_hour_24 = start_hour %}
-              {% endif %}
-              {% set event_starttime = '%02d:00' | format(start_hour_24) %}
-            {% else %}
-              {% set event_starttime = 'None' %}
-            {% endif %}
-            {{ event_starttime }}
-          event_end_time: >
-            {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
-            {% if time_string %}
-              {% set end_hour = time_string[1] | int %}
-              {% set period = time_string[2] %}
-              {% if period == 'pm' and end_hour < 12 %}
-                {% set end_hour_24 = end_hour + 12 %}
-              {% elif period == 'am' and end_hour == 12 %}
-                {% set end_hour_24 = 0 %}
-              {% else %}
-                {% set end_hour_24 = end_hour %}
-              {% endif %}
-              {% set event_endtime = '%02d:00' | format(end_hour_24) %}
-            {% else %}
-              {% set event_endtime = 'None' %}
-            {% endif %}
-            {{ event_endtime }}
-          event_start_datetime: >
-            {% set date_string = trigger.event.data['text'] | regex_findall_index('Fill your boots on ([A-Za-z]+ \d+ [A-Za-z]+):') %}
-            {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
-            {% if date_string and time_string %}
-              {% set start_hour = time_string[0] | int %}
-              {% set period = time_string[2] %}
-              {% set start_hour_24 = start_hour + 12 if period == 'pm' and start_hour != 12 else start_hour %}
-              {% set start_hour_24 = 0 if period == 'am' and start_hour == 12 else start_hour_24 %}
-              {% set current_year = now().year %}
-              {% set date_object = strptime(date_string + ' ' + current_year|string, '%A %d %B %Y') %}
-              {% set event_start_datetime = date_object.replace(hour=start_hour_24, minute=0).strftime('%Y-%m-%d %H:%M') %}
-            {% else %}
-              {% set event_start_datetime = 'None' %}
-            {% endif %}
-            {{ event_start_datetime }}
-          event_end_datetime: >
-            {% set date_string = trigger.event.data['text'] | regex_findall_index('Fill your boots on ([A-Za-z]+ \d+ [A-Za-z]+):') %}
-            {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
-            {% if date_string and time_string %}
-              {% set start_hour = time_string[0] | int %}
-              {% set end_hour = time_string[1] | int %}
-              {% set period = time_string[2] %}
-              {% set current_year = now().year %}
-              {% set end_hour_24 = end_hour + 12 if period == 'pm' and end_hour != 12 else end_hour %}
-              {% set end_hour_24 = end_hour_24 if period == 'am' and end_hour != 12 else (0 if period == 'am' and end_hour == 12 else end_hour_24) %}
-              {% set date_object = strptime(date_string ~ ' ' ~ current_year|string, '%A %d %B %Y') %}
-              {% set event_end_datetime = date_object.replace(hour=end_hour_24, minute=0).strftime('%Y-%m-%d %H:%M') %}
-            {% else %}
-              {% set event_end_datetime = 'None' %}
-            {% endif %}
-            {{ event_end_datetime }}
-```
+### Import the package
 
-In the developer tools, run a check on the config and by clicking the "Check Configuration" button - it should check out if you've done the above correctly but if not fix whatever issue it is throwing.
+I have packaged the solution into a yaml package file which you can simply copy/paste to your config/packages folder. The package can be found [here](https://github.com/DJBenson/ha-stuff/blob/main/homeassistant/packages/octopus_free_electricity.yaml)
 
-![image](https://github.com/user-attachments/assets/70829eba-9e20-4f49-8f5c-7ac747a23078)
+Once there and you've reloaded the yaml configuration (namely Automation and Input Date Time).
 
-Scroll down and reload the template sensors by clicking the "Template Entities" link.
+<img width="1053" alt="image" src="https://github.com/user-attachments/assets/7417277f-79b6-4b08-b9e6-60b0f3c0f98e">
 
-![image](https://github.com/user-attachments/assets/25a294cf-858e-42f1-b915-f8df9475c3e9)
+You'll be presented with a number of fields;
 
-You should now have a sensor named sensor.octopus_free_electricity - at this point it's probably unavailable - this is fine - it's not been triggered yet! The sensor has (or will have once it's triggered) a state of the day and time of the next event - this is mostly for display purposes, whilst the attributes contain the good stuff. I've included several so you can pick and choose what to use - the attribute names are fairly self-explanatory;
+<img width="491" alt="image" src="https://github.com/user-attachments/assets/d2cf2fa0-a10a-4a3e-80cb-17bbe7af0d33">
 
-![image](https://github.com/user-attachments/assets/23409a53-e5ae-42dd-b3a0-219d7ca52bd3)
+* input_datetime.octopus_free_electricity_start - this holds the start of the event in a datetime object
+* input_datetime.octopus_free_electricity_end - this holds the start of the event in a datetime object
+* input_text.octopus_free_electricity_regex_date - this holds the regex which selects the date from the email - only change this if Octopus change their email layout
+* input_text.octopus_free_electricity_regex_start - this holds the regex which selects the event start time from the email - only change this if Octopus change their email layout
+* input_text.octopus_free_electricity_regex_end - this holds the regex which selects the event end time from the email - only change this if Octopus change their email layout
 
 ## How to test
 
@@ -170,4 +78,4 @@ This entire solution relies on the format of the email Octopus are sending not c
 * The body of the email must include the words "Fill your boots"
 * The time period must include a designator (AM/PM)
 
-If any of that changes the sensor will not trigger, it should be fairly easy to fix and I will pick up fixes as I spot them.
+If any of that changes the sensor will not trigger. I have now exposed regex fields to allow the code to be amended through the UI. If (and when) it does change, I will publish new regex as part of the package.
