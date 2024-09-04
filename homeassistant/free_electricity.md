@@ -30,7 +30,11 @@ If your email server is not PUSH-enabled (or it's unreliable) click on "Configur
 
 ### Import the package
 
-I have packaged the solution into a yaml package file which you can simply copy/paste to your config/packages folder. The package can be found [here](https://github.com/DJBenson/ha-stuff/blob/main/homeassistant/packages/octopus_free_electricity.yaml)
+I have packaged the solution into a yaml package file which you can simply copy/paste to your config/packages folder. The package can be found [here](https://github.com/DJBenson/ha-stuff/blob/main/homeassistant/packages/octopus_free_electricity.yaml).
+
+Your packages folder should be as per the below. For more on packages see [here](https://www.home-assistant.io/docs/configuration/packages/).
+<img width="311" alt="image" src="https://github.com/user-attachments/assets/2ec2f3d2-5454-44a6-a233-fdb034dd9e06">
+
 
 Once there and you've reloaded the yaml configuration (namely Automation and Input Date Time).
 
