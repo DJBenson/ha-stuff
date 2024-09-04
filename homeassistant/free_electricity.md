@@ -42,7 +42,7 @@ Once there and you've reloaded the yaml configuration (namely Automation and Inp
 
 You'll be presented with a number of fields;
 
-<img width="491" alt="image" src="https://github.com/user-attachments/assets/d2cf2fa0-a10a-4a3e-80cb-17bbe7af0d33">
+<img width="486" alt="image" src="https://github.com/user-attachments/assets/6993bb5d-bf0f-4f7f-af13-dfe755d83b2f">
 
 * input_datetime.octopus_free_electricity_start - this holds the start of the event in a datetime object
 * input_datetime.octopus_free_electricity_end - this holds the start of the event in a datetime object
