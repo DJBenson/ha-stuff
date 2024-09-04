@@ -1,0 +1,190 @@
+# Set up the IMAP integration as per https://github.com/DJBenson/ha-stuff/blob/main/homeassistant/free_electricity.md
+# Copy and paste either the file or the content of this file to the packages directory of your Home Assistant Config folder
+# Reload all of the YAML configuration (alternatively you can reload Automations, Input Text and Template Entities individually)
+
+input_datetime:
+  octopus_free_electricity_start:
+    name: Octopus Free Electricity Start
+    has_date: true
+    has_time: true
+  octopus_free_electricity_end:
+    name: Octopus Free Electricity Start
+    has_date: true
+    has_time: true
+
+input_text:
+  octopus_free_electricity_regex_date:
+    name: Octopus Free Electricity Date Regex
+    initial: '([A-Za-z]+ \d+ [A-Za-z]+)'
+  octopus_free_electricity_regex_start:
+    name: Octopus Free Electricity Start Time Regex
+    initial: '[A-Za-z]+ \d+ [A-Za-z]+: (\d+)-'
+  octopus_free_electricity_regex_end:
+    name: Octopus Free Electricity End Time Regex
+    initial: '[A-Za-z]+ \d+ [A-Za-z]+: \d+-(\d+)'
+
+automation:
+  - alias: Extract Event Details from Email
+    trigger:
+      - platform: event
+        event_type: imap_content
+    condition:
+      - condition: template
+        value_template: |
+          {{ "Fill your boots on" in trigger.event.data['text'] }}
+    action:
+      - variables:
+          email_content: "{{ trigger.event.data['text'] }}"
+          regex_date: "Fill your boots on {{ states('input_text.octopus_free_electricity_regex_date')|string }}"
+          regex_start: "Fill your boots on {{ states('input_text.octopus_free_electricity_regex_start')|string }}"
+          regex_end: "Fill your boots on {{ states('input_text.octopus_free_electricity_regex_end')|string }}"
+          event_date: >
+            {% set match = email_content | regex_findall_index(regex_date) %} {{ match if match else None }}
+          start_time_raw: >
+            {% set regex_date = states('input_text.octopus_free_electricity_regex_start') %}
+            {% set match = email_content | regex_findall_index(regex_start) %} {{ match if match else None }}
+          end_time_raw: >
+            {% set regex_date = states('input_text.octopus_free_electricity_regex_end') %}
+            {% set match = email_content | regex_findall_index(regex_end) %} {{ match if match else None }}
+          start_time: |
+            {% if start_time_raw is not none %}
+              {{ (start_time_raw | int + 12) if 'pm' in email_content and start_time_raw | int < 12 else start_time_raw | int }}
+            {% else %}
+              None
+            {% endif %}
+          end_time: |
+            {% if end_time_raw is not none %}
+              {{ (end_time_raw | int + 12) if 'pm' in email_content and end_time_raw | int < 12 else end_time_raw | int }}
+            {% else %}
+              None
+            {% endif %}
+          start_datetime: |
+            {% if event_date and start_time is not none %}
+              {% set current_year = now().year %}
+              {% set parsed_date = strptime(event_date + ' ' + current_year|string, '%A %d %B %Y') %}
+              {% if parsed_date < now().replace(tzinfo=None) %}
+                {% set parsed_date = strptime(event_date + ' ' + (current_year + 1)|string, '%A %d %B %Y') %}
+              {% endif %}
+              {{ parsed_date.strftime('%Y-%m-%d') }} {{ '%02d:00:00' | format(start_time) }}
+            {% else %}
+              None
+            {% endif %}
+          end_datetime: |
+            {% if event_date and end_time is not none %}
+              {% set current_year = now().year %}
+              {% set parsed_date = strptime(event_date + ' ' + current_year|string, '%A %d %B %Y') %}
+              {% if parsed_date < now().replace(tzinfo=None) %}
+                {% set parsed_date = strptime(event_date + ' ' + (current_year + 1)|string, '%A %d %B %Y') %}
+              {% endif %}
+              {{ parsed_date.strftime('%Y-%m-%d') }} {{ '%02d:00:00' | format(end_time) }}
+            {% else %}
+              None
+            {% endif %}
+      - target:
+          entity_id: input_datetime.octopus_free_electricity_start
+        data:
+          datetime: >
+            {{ start_datetime if start_datetime is not none else '1970-01-01
+            00:00:00' }}
+        action: input_datetime.set_datetime
+      - target:
+          entity_id: input_datetime.octopus_free_electricity_end
+        data:
+          datetime: >
+            {{ end_datetime if end_datetime is not none else '1970-01-01 00:00:00'
+            }}
+        action: input_datetime.set_datetime
+
+template:
+  - trigger:
+      - platform: event
+        event_type: "imap_content"
+        id: "custom_event"
+    sensor:
+      - name: Octopus Free Electricity
+        state: >
+          {% set date_string = trigger.event.data['text'] | regex_findall_index('Fill your boots on ([A-Za-z]+ \d+ [A-Za-z]+):') %}
+          {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
+          {% if date_string and time_string %}
+            {% set current_year = now().year %}
+            {% set event_datetime = date_string + ' ' + current_year|string + ', ' + time_string[0] + '-' + time_string[1] + time_string[2] %}
+          {% else %}
+            {% set event_datetime = 'None' %}
+          {% endif %}
+          {{ event_datetime }}
+        attributes:
+          event_date: >
+            {% set date_string = trigger.event.data['text'] | regex_findall_index('Fill your boots on ([A-Za-z]+ \d+ [A-Za-z]+):') %}        
+            {% if date_string %}
+              {% set current_year = now().year %}
+              {% set date_object = strptime(date_string ~ ' ' ~ current_year|string, '%A %d %B %Y') %}
+              {{ date_object.strftime('%Y-%m-%d') }}
+            {% else %}
+              None
+            {% endif %}
+            {{ event_date }}
+          event_start_time: >
+            {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
+            {% if time_string %}
+              {% set start_hour = time_string[0] | int %}
+              {% set period = time_string[2] %}
+              {% if period == 'pm' and start_hour < 12 %}
+                {% set start_hour_24 = start_hour + 12 %}
+              {% elif period == 'am' and start_hour == 12 %}
+                {% set start_hour_24 = 0 %}
+              {% else %}
+                {% set start_hour_24 = start_hour %}
+              {% endif %}
+              {% set event_starttime = '%02d:00' | format(start_hour_24) %}
+            {% else %}
+              {% set event_starttime = 'None' %}
+            {% endif %}
+            {{ event_starttime }}
+          event_end_time: >
+            {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
+            {% if time_string %}
+              {% set end_hour = time_string[1] | int %}
+              {% set period = time_string[2] %}
+              {% if period == 'pm' and end_hour < 12 %}
+                {% set end_hour_24 = end_hour + 12 %}
+              {% elif period == 'am' and end_hour == 12 %}
+                {% set end_hour_24 = 0 %}
+              {% else %}
+                {% set end_hour_24 = end_hour %}
+              {% endif %}
+              {% set event_endtime = '%02d:00' | format(end_hour_24) %}
+            {% else %}
+              {% set event_endtime = 'None' %}
+            {% endif %}
+            {{ event_endtime }}
+          event_start_datetime: >
+            {% set date_string = trigger.event.data['text'] | regex_findall_index('Fill your boots on ([A-Za-z]+ \d+ [A-Za-z]+):') %}
+            {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
+            {% if date_string and time_string %}
+              {% set start_hour = time_string[0] | int %}
+              {% set period = time_string[2] %}
+              {% set start_hour_24 = start_hour + 12 if period == 'pm' and start_hour != 12 else start_hour %}
+              {% set start_hour_24 = 0 if period == 'am' and start_hour == 12 else start_hour_24 %}
+              {% set current_year = now().year %}
+              {% set date_object = strptime(date_string + ' ' + current_year|string, '%A %d %B %Y') %}
+              {% set event_start_datetime = date_object.replace(hour=start_hour_24, minute=0).strftime('%Y-%m-%d %H:%M') %}
+            {% else %}
+              {% set event_start_datetime = 'None' %}
+            {% endif %}
+            {{ event_start_datetime }}
+          event_end_datetime: >
+            {% set date_string = trigger.event.data['text'] | regex_findall_index('Fill your boots on ([A-Za-z]+ \d+ [A-Za-z]+):') %}
+            {% set time_string = trigger.event.data['text'] | regex_findall_index('(\d+)-(\d+)(am|pm)') %}
+            {% if date_string and time_string %}
+              {% set start_hour = time_string[0] | int %}
+              {% set end_hour = time_string[1] | int %}
+              {% set period = time_string[2] %}
+              {% set current_year = now().year %}
+              {% set end_hour_24 = end_hour + 12 if period == 'pm' and end_hour != 12 else end_hour %}
+              {% set end_hour_24 = end_hour_24 if period == 'am' and end_hour != 12 else (0 if period == 'am' and end_hour == 12 else end_hour_24) %}
+              {% set date_object = strptime(date_string ~ ' ' ~ current_year|string, '%A %d %B %Y') %}
+              {% set event_end_datetime = date_object.replace(hour=end_hour_24, minute=0).strftime('%Y-%m-%d %H:%M') %}
+            {% else %}
+              {% set event_end_datetime = 'None' %}
+            {% endif %}
+            {{ event_end_datetime }}
