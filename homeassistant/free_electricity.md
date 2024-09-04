@@ -128,7 +128,11 @@ sensor:
 
 In the developer tools, run a check on the config and by clicking the "Check Configuration" button - it should check out if you've done the above correctly but if not fix whatever issue it is throwing.
 
+![image](https://github.com/user-attachments/assets/70829eba-9e20-4f49-8f5c-7ac747a23078)
+
 Scroll down and reload the template sensors by clicking the "Template Entities" link.
+
+![image](https://github.com/user-attachments/assets/25a294cf-858e-42f1-b915-f8df9475c3e9)
 
 You should now have a sensor named sensor.octopus_free_electricity - at this point it's probably unavailable - this is fine - it's not been triggered yet! The sensor has (or will have once it's triggered) a state of the day and time of the next event - this is mostly for display purposes, whilst the attributes contain the good stuff. I've included several so you can pick and choose what to use - the attribute names are fairly self-explanatory;
 
