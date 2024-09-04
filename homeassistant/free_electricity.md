@@ -145,6 +145,7 @@ You should now have a sensor named sensor.octopus_free_electricity - at this poi
 * Set the "Event type" to "imap_content"
 * Fill in the event data as shown below
 * Click the "Fire Event" button
+* Go back and check your sensor - it should have data.
 
 ```
 entry_id: 01J5RGADKJ8FM0RK9TW7WDVZ3E
