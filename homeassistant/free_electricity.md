@@ -1,4 +1,4 @@
-# Octopus Energy Free Electricity Sensor for Home Assistant
+# Octopus Energy Free Electricity Solution for Home Assistant
 Octopus Energy have started a nationwide scheme of offering free electricity slots to customers - they have not (yet!) however added those slots to their API so there is (currently) no way to trigger automations on the back of them. This walkthrough aims to address that using the Home Assistant IMAP integration and a (very) fragile collection of input_datetime fields - see [below](https://github.com/DJBenson/ha-stuff/blob/main/homeassistant/free_electricity.md#caveats) for more on that.
 
 **This is not the entire solution, it simply creates two input_datetimes (one for the start of the event and one for the end) on which to base your solution which is not covered here as people will have different requirements.**
