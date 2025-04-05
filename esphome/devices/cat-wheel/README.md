@@ -1,12 +1,12 @@
 # ESPHome Cat (Exercise) Wheel Tracker
 
 ## Content
-* Introduction
-* Bill of Materials
-* Hardware Build
-* Software
-  - ESPHome
-  - Home Assistant
+* [Introduction](README.md#introduction)
+* [Bill of Materials](README.md#bill-of-materials)
+* [Hardware Build](README.md#hardware-build)
+* [Software](README.md#software)
+  - [ESPHome](README.md#esphome)
+  - [Home Assistant](README.md#home-assistant)
 
 ## Introduction
 We have three cats that we rescued from [Bleak Holt Animal Sanctuary](https://www.bleakholt.org/) a few years ago and all of them have varying levels of health conditions which means they are not able to go outside (for fear of death or in the case of one of the little horrors, eating something he shouldn't).
@@ -17,6 +17,7 @@ As anything I can make "smart" has been done, I wanted a new project. I often wo
 
 ![image](https://github.com/user-attachments/assets/5829d1b8-d3f0-4dd7-92c7-3048dea51dd2)
 
+[Top](READNE.md#content)
 
 ## Bill of Materials
 
@@ -51,6 +52,8 @@ As anything I can make "smart" has been done, I wanted a new project. I often wo
  
 * USB cable for programming (Micro USB to USB-A/USB-C)
 
+[Top](READNE.md#content)
+
 ## Hardware Build
 
 The hardware build is very easy if you go with the same parts as it all fits together with the Dupont cables. One word of warning, some of the LCD2004 units some with the separate I2C board which requires soldering - I was fine with that, but if you're not handy with a soldering iron, make sure you get one pre-soldered.
@@ -81,6 +84,8 @@ The hardware build is very easy if you go with the same parts as it all fits tog
   - black -> GND on the ESP32 expansion board
   - yellow -> pin 25 on the ESP32 expansion board
 
+[Top](READNE.md#content)
+
 ## Software
 
 I had some specific requirements that I wanted out of my project which weren't (all) available in the existing projects - here's what I aimed for;
@@ -98,6 +103,8 @@ I had some specific requirements that I wanted out of my project which weren't (
   - All sensors (with the exception of current speed) should survive a reboot
   - All sensors should provide statistics to Home Assistant and allow switching of units (native unit is imperial - i.e. miles/mi and miles per hour/mph)
   - Web component enabled
+
+[Top](READNE.md#content)
 
 ### ESPHome
 
@@ -399,6 +406,7 @@ switch:
       - lambda: |-
           id(lcd_display).no_backlight();
 ```
+[Top](READNE.md#content)
 
 ### Home Assistant
 
@@ -416,6 +424,8 @@ The entites provided to Home Assistant are as follows;
 * Total Distance (mi)
 * Last Movement (text)
 * Wheel Sensor (boolean)
+
+[Top](READNE.md#content)
   
 #### Configuration
 * Reboot Device (Button)
