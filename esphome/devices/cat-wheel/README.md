@@ -4,6 +4,7 @@
 * [Introduction](README.md#introduction)
 * [Bill of Materials](README.md#bill-of-materials)
 * [Hardware Build](README.md#hardware-build)
+* [Enclosure](README.md#enclosure)
 * [Software](README.md#software)
   - [ESPHome](README.md#esphome)
   - [Home Assistant](README.md#home-assistant)
@@ -83,6 +84,12 @@ The hardware build is very easy if you go with the same parts as it all fits tog
   - red -> 5V on the ESP32 expansion board
   - black -> GND on the ESP32 expansion board
   - yellow -> pin 25 on the ESP32 expansion board
+
+[Top](README.md#top)
+
+## Enclosure
+
+WORK IN PROGRESS
 
 [Top](README.md#top)
 
