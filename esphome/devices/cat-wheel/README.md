@@ -42,7 +42,7 @@ As anything I can make "smart" has been done, I wanted a new project. I often wo
 
 ![image](https://github.com/user-attachments/assets/e638b0f2-fb4f-4da0-a7a8-36c05e221683)
 
-* Project box / 3D printed enclosure
+* Project box / [3D printed enclosure](README.md#3d-printed-enclosure)
 
 * Strong magnets - I used 2 evenly spaced at the half way point of the circumference of the wheel
 
@@ -52,6 +52,12 @@ As anything I can make "smart" has been done, I wanted a new project. I often wo
   - DC barrel jack adaptor
  
 * USB cable for programming (Micro USB to USB-A/USB-C)
+
+* Sundries including
+  * [Surface mount barrel jack adaptor](https://it.aliexpress.com/item/32871869855.html)
+  * [Threaded heat inserts](https://it.aliexpress.com/item/1005003582355741.html) for the recess in the bottom of the case to secure the ESP32 expansion board and matching screws (I think they are M2)
+  * Self tapping screws to secure the lid on the enclosure
+  * Heat shrink to keep DuPont connectors/cables together
 
 [Top](README.md#top)
 
@@ -89,7 +95,22 @@ The hardware build is very easy if you go with the same parts as it all fits tog
 
 ## Enclosure
 
-WORK IN PROGRESS
+<img width="388" alt="image" src="https://github.com/user-attachments/assets/a2f4e9c4-9924-460b-8c60-6e44b7a3d5a7" />
+
+I couldn't find anything which quite fit what I was builidng so I put together a Frankenstein project box comprised of;
+
+* Parametric project box with lid and countersunk screw holes for self-tapping screws
+* A recess for the ESP32 expansion board
+* A 12mm hole for the surface mount barrel jack adapter
+* A 6mm hole for the sensor cables to pass through
+
+[3MF file](https://github.com/DJBenson/ha-stuff/blob/main/esphome/devices/cat-wheel/CatWheelCase.3mf)
+
+[STL file](https://github.com/DJBenson/ha-stuff/blob/main/esphome/devices/cat-wheel/CatWheelCase.stl)
+
+In addition I printed [this](https://www.thingiverse.com/thing:4514816) case from Thingiverse to hold the reed sensor.
+
+**Todo: add photo of part.**
 
 [Top](README.md#top)
 
