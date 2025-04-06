@@ -95,11 +95,12 @@ The hardware build is very easy if you go with the same parts as it all fits tog
 
 ## Enclosure
 
-<img width="388" alt="image" src="https://github.com/user-attachments/assets/a2f4e9c4-9924-460b-8c60-6e44b7a3d5a7" />
+<img width="358" alt="image" src="https://github.com/user-attachments/assets/2ca64562-c66f-4ba4-94f1-ff2a9d354c35" />
 
 I couldn't find anything which quite fit what I was builidng so I put together a Frankenstein project box comprised of;
 
 * Parametric project box with lid and countersunk screw holes for self-tapping screws
+* A frame/mount incorporated into the lid for the LCD2004 display
 * A recess for the ESP32 expansion board
 * A 12mm hole for the surface mount barrel jack adapter
 * A 6mm hole for the sensor cables to pass through
