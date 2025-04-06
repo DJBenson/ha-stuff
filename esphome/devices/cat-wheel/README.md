@@ -31,7 +31,7 @@ As anything I can make "smart" has been done, I wanted a new project. I often wo
 ![image](https://github.com/user-attachments/assets/1b757116-e59e-4afd-8d5d-e7684e9dbfaf)
 
 > [!WARNING]
-> This board does not have reverse polatity protection - ensure your power supply has the correct polarity or you will release the magic smoke (AKA why I always order 2 of everything from ALIExpress).
+> This board does not have reverse polarity protection - ensure your power supply has the correct polarity or you will release the magic smoke (AKA why I always order 2 of everything from ALIExpress).
 
 
 * G123-08 / LM393 Reed sensor
