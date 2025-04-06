@@ -104,9 +104,10 @@ I couldn't find anything which quite fit what I was builidng so I put together a
 * A 12mm hole for the surface mount barrel jack adapter
 * A 6mm hole for the sensor cables to pass through
 
+[STL file (click to preview)](https://github.com/DJBenson/ha-stuff/blob/main/esphome/devices/cat-wheel/CatWheelCase.stl)
+
 [3MF file](https://github.com/DJBenson/ha-stuff/blob/main/esphome/devices/cat-wheel/CatWheelCase.3mf)
 
-[STL file](https://github.com/DJBenson/ha-stuff/blob/main/esphome/devices/cat-wheel/CatWheelCase.stl)
 
 In addition I printed [this](https://www.thingiverse.com/thing:4514816) case from Thingiverse to hold the reed sensor.
 
