@@ -30,9 +30,17 @@ As anything I can make "smart" has been done, I wanted a new project. I often wo
 
 ![image](https://github.com/user-attachments/assets/1b757116-e59e-4afd-8d5d-e7684e9dbfaf)
 
+> [!WARNING]
+> This board does not have reverse polatity protection - ensure your power supply has the correct polarity or you will release the magic smoke (AKA why I always order 2 of everything from ALIExpress).
+
+
 * G123-08 / LM393 Reed sensor
 
 ![image](https://github.com/user-attachments/assets/ec8bc911-1a2c-42e9-a6aa-aadc59b4fff0)
+
+> [!CAUTION]
+> The protroding part of the sensor is made of glass and is very fragile (again, ask me how I know...glad I ordered two!)
+
 
 * LCD display (LCD2004 with I2C daughterboard) - you can do without this, just remove the display elements of the code
 
@@ -49,7 +57,7 @@ As anything I can make "smart" has been done, I wanted a new project. I often wo
 * Power supply - if you use the breakout box, you have the option of;
   - Micro USB
   - USB-C
-  - DC barrel jack adaptor
+  - DC barrel jack adaptor (I chose this option, a generic 12v/2a adapter).
  
 * USB cable for programming (Micro USB to USB-A/USB-C)
 
