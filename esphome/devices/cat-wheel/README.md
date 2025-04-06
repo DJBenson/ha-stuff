@@ -109,10 +109,12 @@ I couldn't find anything which quite fit what I was builidng so I put together a
 
 [3MF file](https://github.com/DJBenson/ha-stuff/blob/main/esphome/devices/cat-wheel/CatWheelCase.3mf)
 
+![image](https://github.com/user-attachments/assets/eac1e500-61cb-49f0-9351-f157e25fc2a5) ![image](https://github.com/user-attachments/assets/dca9afb6-b849-4d58-9490-b2a411c848ae)
 
 In addition I printed [this](https://www.thingiverse.com/thing:4514816) case from Thingiverse to hold the reed sensor.
 
-**Todo: add photo of part.**
+![image](https://github.com/user-attachments/assets/d0759111-ba7c-4747-8a37-3319880f78ce)
+
 
 [Top](README.md#top)
 
@@ -443,20 +445,14 @@ switch:
 The entites provided to Home Assistant are as follows;
 
 #### Controls
-* Backlight (Switch)
-* Factory Reset (Button)
-* Reset All Stats (Button)
+![image](https://github.com/user-attachments/assets/094aa5eb-9e60-4128-a951-ff456965d566)
   
 #### Sensors
-* Current Speed (mph)
-* Max Speed (mph)
-* Distance Today (mi)
-* Total Distance (mi)
-* Last Movement (text)
-* Wheel Sensor (boolean)
+![image](https://github.com/user-attachments/assets/6aca65fd-b57f-4407-9696-3021caee5a0b)
 
-[Top](README.md#top)
   
 #### Configuration
-* Reboot Device (Button)
-* Reboot to Safe Mode (Button)
+![image](https://github.com/user-attachments/assets/67553337-c618-4ea8-a410-982c43810f75)
+
+
+[Top](README.md#top)
