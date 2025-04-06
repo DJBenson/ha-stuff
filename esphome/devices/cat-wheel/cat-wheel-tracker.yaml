@@ -4,6 +4,7 @@ esphome:
     then:
       - lambda: |-
           id(lcd_display).backlight();
+          id(lcd_backlight_switch).publish_state(true);
           id(distance_today).update();
           id(distance_total).update();
           id(speed_max).update();
