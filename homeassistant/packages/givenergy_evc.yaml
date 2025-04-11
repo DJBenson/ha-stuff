@@ -11,7 +11,7 @@
 # Credit to Oliver Shingler (AKA Speak To The Geek) for the inspiration.
 #
 # This version has the following differences/improvements;
-# * Addition of ModBusSlave control entities
+# * Almost feature-complete alignment with the app/portal (scheduling and RFID tag support is not yet available)
 # * Single package file which can be dragged and dropped into Home Assistant with little effort
 # * Implements a select (drop down) for the charger mode rather than individual switches. Original switches included for those who prefer them
 # * Split the sensors for "plugged in" and "charging"
@@ -36,6 +36,15 @@ input_select:
       - "Grid"
     initial: "Grid"
     icon: mdi:menu
+  givenergy_evc_configuration_mode:
+    name: "GivEnergy EVC Configuration Mode"
+    options:
+      - "A: Standalone"
+      - "B: Standalone with PV"
+      - "C: CT Meter"
+      - "D: Inverter Cloud Control"
+    initial: "A: Standalone"
+    icon: mdi:menu
 
 input_number:
   givenergy_evc_solar_export_split:
@@ -50,9 +59,43 @@ input_number:
     min: 0
     max: 24000
     step: 100
-    unit_of_measurement: w
+    unit_of_measurement: W
+  givenergy_evc_charge_power_limit:
+    name: "GivEnergy EVC Charge Power Limit"
+    mode: slider
+    min: 6
+    max: 32
+    step: 1
+    unit_of_measurement: A
+  givenergy_evc_session_energy_limit:
+    name: "GivEnergy EVC Session Energy Limit"
+    mode: slider
+    min: 1
+    max: 250
+    step: 1
+    unit_of_measurement: kWh
+  givenergy_evc_max_import_capacity:
+    name: "GivEnergy EVC Max Import Capacity"
+    mode: slider
+    min: 40
+    max: 100
+    step: 10
+    unit_of_measurement: A
 
 template:
+  - button:
+      - name: "GivEnergy EVC Restart Charger"
+        unique_id: givenergy_evc_restart
+        press:
+          - service: rest_command.givenergy_evc_restart_charger
+      - name: "GivEnergy EVC Unlock Connector"
+        unique_id: givenergy_evc_unlock_connector
+        press:
+          - service: rest_command.givenergy_evc_unlock_connector
+      - name: "GivEnergy EVC Factory Reset"
+        unique_id: givenergy_evc_factory_reset
+        press:
+          - service: rest_command.givenergy_evc_factory_reset
   - binary_sensor:
       - name: "GivEnergy EVC Connected"
         unique_id: givenergy_evc_connected
@@ -171,6 +214,28 @@ switch:
           service: rest_command.givenergy_evc_setplugandgo
           data:
             enabled: "false"
+      givenergy_evc_session_energy_limit:
+        friendly_name: "GivEnergy EVC Session Energy Limit"
+        value_template: "{{ states('sensor.givenergy_evc_session_energy_limit')|float > 0.1 }}"
+        turn_on:
+          service: rest_command.givenergy_evc_session_energy_limit
+          data:
+            limit: "{{ states('input_number.givenergy_evc_session_energy_limit')|float }}"
+        turn_off:
+          service: rest_command.givenergy_evc_session_energy_limit
+          data:
+            limit: "null"
+      givenergy_evc_max_import_capacity:
+        friendly_name: "GivEnergy EVC Max Import Capacity"
+        value_template: "{{ states('sensor.givenergy_evc_max_import_capacity')|int > 0 }}"
+        turn_on:
+          service: rest_command.givenergy_evc_max_import_capacity
+          data:
+            limit: "{{ states('input_number.givenergy_evc_session_energy_limit')|int }}"
+        turn_off:
+          service: rest_command.givenergy_evc_max_import_capacity
+          data:
+            limit: "Null"
       givenergy_evc_chargingstopstart:
         friendly_name: "GivEnergy EVC Charging Stop/Start"
         value_template: "{{ is_state('sensor.givenergy_evc_status', 'Charging') }}"
@@ -191,10 +256,29 @@ switch:
           service: rest_command.givenergy_evc_leds
           data:
             value: "0"
+      givenergy_evc_leds:
+        friendly_name: "GivEnergy EVC Local Control"
+        value_template: "{{ is_state('binary_sensor.givenergy_evc_local_control', 'on') }}"
+        turn_on:
+          service: rest_command.givenergy_evc_local_control
+          data:
+            value: "1"
+        turn_off:
+          service: rest_command.givenergy_evc_local_control
+          data:
+            value: "0"
 
 rest_command:
   givenergy_evc_setmode:
     url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/change-mode'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: '{"mode": "{{ mode }}"}'
+  givenergy_evc_set_configuration_mode:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/configuration-mode/'
     method: POST
     headers:
       Authorization: !secret givenergy_apikey
@@ -209,6 +293,22 @@ rest_command:
       Accept: "application/json"
       Content-Type: "application/json"
     payload: '{"enabled": {{ enabled }}}'
+  givenergy_evc_session_energy_limit:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-session-energy-limit/'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: '{"limit": {{ limit }}}'
+  givenergy_evc_max_import_capacity:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-max-import-capacity/'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: '{"value": {{ value }}}'
   givenergy_evc_startcharge:
     url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/start-charge'
     method: POST
@@ -231,6 +331,35 @@ rest_command:
       Accept: "application/json"
       Content-Type: "application/json"
     payload: '{"value": {{ value }}}'
+  givenergy_evc_charge_power_limit:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/adjust-charge-power-limit/'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: '{"limit": {{ value }}}'
+  givenergy_evc_restart_charger:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/restart-charger'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+  givenergy_evc_factory_reset:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/perform-factory-reset'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+  givenergy_evc_unlock_connector:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/unlock-connector'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
   givenergy_evc_inverter_control_mode:
     url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/configure-inverter-control/'
     method: POST
@@ -344,10 +473,46 @@ rest:
         value_template: "{{ value_json.data.inverter_battery_export_split }}"
       - name: "GivEnergy EVC Max Battery Discharge Power"
         unique_id: givenergy_evc_max_battery_discharge_power
+        unit_of_measurement: W
         value_template: "{{ value_json.data.max_battery_discharge_power_to_evc }}"
       - name: "GivEnergy EVC Inverter Control Mode"
         unique_id: givenergy_evc_inverter_control_mode
         value_template: "{{ value_json.data.mode }}"
+
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/configuration-mode/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    sensor:
+      - name: "GivEnergy EVC Configuration Mode"
+        unique_id: givenergy_evc_configuration_mode
+        value_template: "{{ value_json.data.value }}"
+
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-session-energy-limit/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    sensor:
+      - name: "GivEnergy EVC Session Energy Limit"
+        unique_id: givenergy_evc_session_energy_limit
+        unit_of_measurement: kWh
+        value_template: "{% if is_number(value_json.data.value) %} {{ value_json.data.value }} {% else %} 0 {% endif %}"
+
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-max-import-capacity/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    sensor:
+      - name: "GivEnergy EVC Max Import Capacity"
+        unique_id: givenergy_evc_max_import_capacity
+        unit_of_measurement: A
+        value_template: "{{ value_json.data.value }}"
 
   - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-plug-and-go/'
     scan_interval: 15
@@ -359,6 +524,7 @@ rest:
       - name: "GivEnergy EVC Plug And Go State"
         unique_id: givenergy_evc_plugandgo_state
         value_template: "{{ value_json.data.value }}"
+
   - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/enable-front-panel-led/'
     scan_interval: 15
     headers:
@@ -368,6 +534,29 @@ rest:
     binary_sensor:
       - name: "GivEnergy EVC LED State"
         unique_id: givenergy_evc_led_state
+        value_template: "{{ value_json.data.value }}"
+
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/enable-local-control/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    binary_sensor:
+      - name: "GivEnergy EVC Local Control"
+        unique_id: givenergy_evc_local_control
+        value_template: "{{ value_json.data.value }}"
+
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/adjust-charge-power-limit/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    sensor:
+      - name: "GivEnergy EVC Charge Power Limit"
+        unique_id: givenergy_evc_charge_power_limit
+        unit_of_measurement: A
         value_template: "{{ value_json.data.value }}"
 
 automation:
@@ -499,7 +688,6 @@ automation:
     mode: single
 
   - alias: GivEnergy EVC Configure Inverter Mode
-    description: ""
     triggers:
       - entity_id:
           - sensor.givenergy_evc_inverter_control_mode
@@ -540,4 +728,197 @@ automation:
               - metadata: {}
                 data: {}
                 action: rest_command.givenergy_evc_configure_inverter_control
+    mode: single
+    
+  - alias: GivEnergy EVC Charge Power Limit
+    triggers:
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_charge_power_limit
+        from: null
+        to: null
+        id: get_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_charge_power_limit
+        from: null
+        to: null
+        id: set_value
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_value
+            sequence:
+              - action: input_number.set_value
+                metadata: {}
+                data:
+                  value: "{{ states('sensor.givenergy_evc_charge_power_limit')|int }}"
+                target:
+                  entity_id: input_number.givenergy_evc_charge_power_limit
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_value
+            sequence:
+              - metadata: {}
+                data_template:
+                  value: >
+                    {{ states('input_number.givenergy_evc_charge_power_limit')|int
+                    }}
+                action: rest_command.givenergy_evc_charge_power_limit
+    mode: single
+
+  - alias: GivEnergy EVC Configuration Mode
+    triggers:
+      - entity_id:
+          - sensor.givenergy_evc_configuration_mode
+        id: get_mode
+        trigger: state
+      - entity_id:
+          - input_select.givenergy_evc_configuration_mode
+        id: set_mode
+        from: null
+        to: null
+        trigger: state
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_mode
+            sequence:
+              - metadata: {}
+                data:
+                  option: >
+                    {% if is_state('sensor.givenergy_evc_configuration_mode','A') %}
+                      A: Standalone
+                    {% elif is_state('sensor.givenergy_evc_configuration_mode','B')
+                    %}
+                      B: Standalone with PV
+                    {% elif is_state('sensor.givenergy_evc_configuration_mode','C')
+                    %}
+                      C: CT Meter
+                    {% elif is_state('sensor.givenergy_evc_configuration_mode','D')
+                    %}
+                      D: Inverter Cloud Control
+                    {% else %}
+                      Unknown
+                    {% endif %}
+                target:
+                  entity_id: input_select.givenergy_evc_configuration_mode
+                action: input_select.select_option
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_mode
+            sequence:
+              - metadata: {}
+                data_template:
+                  mode: >
+                    {% if
+                    is_state('input_select.givenergy_evc_configuration_mode','A:
+                    Standalone') %}
+                      A
+                    {% elif
+                    is_state('input_select.givenergy_evc_configuration_mode','B:
+                    Standalone with PV') %}
+                      B
+                    {% elif
+                    is_state('input_select.givenergy_evc_configuration_mode','C: CT
+                    Meter') %}
+                      C
+                    {% elif
+                    is_state('input_select.givenergy_evc_configuration_mode','D:
+                    Inverter Cloud Control') %}
+                      D
+                    {% else %}
+                      Unknown
+                    {% endif %}
+                action: rest_command.givenergy_evc_set_configuration_mode
+    mode: single
+  - alias: GivEnergy EVC Max Import Capacity
+    triggers:
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_max_import_capacity
+        from: null
+        to: null
+        id: get_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_max_import_capacity
+        from: null
+        to: null
+        id: set_value
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_value
+            sequence:
+              - action: input_number.set_value
+                metadata: {}
+                data:
+                  value: "{{ states('sensor.givenergy_evc_max_import_capacity')|int }}"
+                target:
+                  entity_id: input_number.givenergy_evc_max_import_capacity
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_value
+            sequence:
+              - metadata: {}
+                data_template:
+                  value: >
+                    {{ states('input_number.givenergy_evc_max_import_capacity')|int
+                    }}
+                action: rest_command.givenergy_evc_max_import_capacity
+    mode: single
+
+  - alias: GivEnergy EVC Session Energy Limit
+    triggers:
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_session_energy_limit
+        from: null
+        to: null
+        id: get_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_session_energy_limit
+        from: null
+        to: null
+        id: set_value
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_value
+            sequence:
+              - action: input_number.set_value
+                metadata: {}
+                data:
+                  value: "{{ states('sensor.givenergy_evc_session_energy_limit')|float }}"
+                target:
+                  entity_id: input_number.givenergy_evc_session_energy_limit
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_value
+            sequence:
+              - metadata: {}
+                data_template:
+                  limit: >
+                    {{
+                    states('input_number.givenergy_evc_session_energy_limit')|float
+                    }}
+                action: rest_command.givenergy_evc_session_energy_limit
     mode: single
