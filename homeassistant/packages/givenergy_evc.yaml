@@ -11,7 +11,7 @@
 # Credit to Oliver Shingler (AKA Speak To The Geek) for the inspiration.
 #
 # This version has the following differences/improvements;
-# * Almost feature-complete alignment with the app/portal (scheduling and RFID tag support is not yet available)
+# * Addition of ModBusSlave control entities
 # * Single package file which can be dragged and dropped into Home Assistant with little effort
 # * Implements a select (drop down) for the charger mode rather than individual switches. Original switches included for those who prefer them
 # * Split the sensors for "plugged in" and "charging"
@@ -284,7 +284,7 @@ rest_command:
       Authorization: !secret givenergy_apikey
       Accept: "application/json"
       Content-Type: "application/json"
-    payload: '{"mode": "{{ mode }}"}'
+    payload: '{"configuration_mode": "{{ mode }}"}'
   givenergy_evc_setplugandgo:
     url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-plug-and-go/'
     method: POST
@@ -560,40 +560,119 @@ rest:
         value_template: "{{ value_json.data.value }}"
 
 automation:
-  - alias: GivEnergy EVC Mode
+  - alias: GivEnergy EVC Handler
     description: ""
-    trigger:
-      - platform: state
-        entity_id:
+    triggers:
+      - entity_id:
           - sensor.givenergy_evc_mode
-        id: get_mode
-      - platform: state
-        entity_id:
+        id: get_evc_mode
+        trigger: state
+      - entity_id:
           - input_select.givenergy_evc_mode
-        id: set_mode
+        id: set_evc_mode
         from: null
         to: null
-    condition: []
-    action:
+        trigger: state
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_max_battery_discharge_power
+        from: null
+        to: null
+        id: get_max_discharge_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_max_battery_discharge_power
+        from: null
+        to: null
+        id: set_max_discharge_value
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_session_energy_limit
+        from: null
+        to: null
+        id: get_session_limit_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_session_energy_limit
+        from: null
+        to: null
+        id: set_session_limit_value
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_max_import_capacity
+        from: null
+        to: null
+        id: get_max_import_capacity_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_max_import_capacity
+        from: null
+        to: null
+        id: set_max_import_capacity_value
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_solar_export_split
+        from: null
+        to: null
+        id: get_solar_split_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_solar_export_split
+        from: null
+        to: null
+        id: set_solar_split_value
+      - entity_id:
+          - sensor.givenergy_evc_inverter_control_mode
+        id: get_inverter_control_mode
+        trigger: state
+      - entity_id:
+          - input_select.givenergy_evc_configure_inverter_mode
+        id: set_inverter_control_mode
+        from: null
+        to: null
+        trigger: state
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_charge_power_limit
+        from: null
+        to: null
+        id: get_charge_power_limit_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_charge_power_limit
+        from: null
+        to: null
+        id: set_charge_power_limit_value
+      - entity_id:
+          - sensor.givenergy_evc_configuration_mode
+        id: get_configuration_mode
+        trigger: state
+      - entity_id:
+          - input_select.givenergy_evc_configuration_mode
+        id: set_configuration_mode
+        from: null
+        to: null
+        trigger: state
+    conditions: []
+    actions:
       - choose:
           - conditions:
               - condition: trigger
                 id:
-                  - get_mode
+                  - get_evc_mode
             sequence:
-              - service: input_select.select_option
-                metadata: {}
+              - metadata: {}
                 data:
                   option: "{{ states('sensor.givenergy_evc_mode') }}"
                 target:
                   entity_id: input_select.givenergy_evc_mode
+                action: input_select.select_option
           - conditions:
               - condition: trigger
                 id:
-                  - set_mode
+                  - set_evc_mode
             sequence:
-              - service: rest_command.givenergy_evc_setmode
-                metadata: {}
+              - metadata: {}
                 data_template:
                   mode: |
                     {% if is_state('input_select.givenergy_evc_mode','Hybrid') %}
@@ -605,29 +684,11 @@ automation:
                     {% else %}
                       ModbusSlave
                     {% endif %}
-    mode: single
-  - alias: GivEnergy EVC Max Discharge Power
-    description: ""
-    triggers:
-      - trigger: state
-        entity_id:
-          - sensor.givenergy_evc_max_battery_discharge_power
-        from: null
-        to: null
-        id: get_value
-      - trigger: state
-        entity_id:
-          - input_number.givenergy_evc_max_battery_discharge_power
-        from: null
-        to: null
-        id: set_value
-    conditions: []
-    actions:
-      - choose:
+                action: rest_command.givenergy_evc_setmode
           - conditions:
               - condition: trigger
                 id:
-                  - get_value
+                  - get_max_discharge_value
             sequence:
               - action: input_number.set_value
                 metadata: {}
@@ -641,35 +702,60 @@ automation:
           - conditions:
               - condition: trigger
                 id:
-                  - set_value
+                  - set_max_discharge_value
             sequence:
               - metadata: {}
                 data: {}
                 action: rest_command.givenergy_evc_configure_inverter_control
-    mode: single
-
-  - alias: GivEnergy Solar Export Split
-    description: ""
-    triggers:
-      - trigger: state
-        entity_id:
-          - sensor.givenergy_evc_solar_export_split
-        from: null
-        to: null
-        id: get_value
-      - trigger: state
-        entity_id:
-          - input_number.givenergy_evc_solar_export_split
-        from: null
-        to: null
-        id: set_value
-    conditions: []
-    actions:
-      - choose:
           - conditions:
               - condition: trigger
                 id:
-                  - get_value
+                  - get_session_limit_value
+            sequence:
+              - action: input_number.set_value
+                metadata: {}
+                data:
+                  value: "{{ states('sensor.givenergy_evc_session_energy_limit')|float }}"
+                target:
+                  entity_id: input_number.givenergy_evc_session_energy_limit
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_session_limit_value
+            sequence:
+              - metadata: {}
+                data_template:
+                  limit: >
+                    {{
+                    states('input_number.givenergy_evc_session_energy_limit')|float
+                    }}
+                action: rest_command.givenergy_evc_session_energy_limit
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_max_import_capacity_value
+            sequence:
+              - action: input_number.set_value
+                metadata: {}
+                data:
+                  value: "{{ states('sensor.givenergy_evc_max_import_capacity')|int }}"
+                target:
+                  entity_id: input_number.givenergy_evc_max_import_capacity
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_max_import_capacity_value
+            sequence:
+              - metadata: {}
+                data_template:
+                  value: >
+                    {{ states('input_number.givenergy_evc_max_import_capacity')|int
+                    }}
+                action: rest_command.givenergy_evc_max_import_capacity
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_solar_split_value
             sequence:
               - action: input_number.set_value
                 metadata: {}
@@ -680,39 +766,25 @@ automation:
           - conditions:
               - condition: trigger
                 id:
-                  - set_value
+                  - set_solar_split_value
             sequence:
               - metadata: {}
                 data: {}
                 action: rest_command.givenergy_evc_configure_inverter_control
-    mode: single
-
-  - alias: GivEnergy EVC Configure Inverter Mode
-    triggers:
-      - entity_id:
-          - sensor.givenergy_evc_inverter_control_mode
-        id: get_mode
-        trigger: state
-      - entity_id:
-          - input_select.givenergy_evc_configure_inverter_mode
-        id: set_mode
-        from: null
-        to: null
-        trigger: state
-    conditions: []
-    actions:
-      - choose:
           - conditions:
               - condition: trigger
                 id:
-                  - get_mode
+                  - get_inverter_control_mode
             sequence:
               - metadata: {}
                 data:
                   option: >-
-                    {% if is_state('sensor.givenergy_evc_inverter_control_mode','SuperEco') %}
+                    {% if
+                    is_state('sensor.givenergy_evc_inverter_control_mode','SuperEco')
+                    %}
                       Solar
-                    {% elif is_state('sensor.givenergy_evc_inverter_control_mode','Eco') %}
+                    {% elif
+                    is_state('sensor.givenergy_evc_inverter_control_mode','Eco') %}
                       Hybrid
                     {% else %}
                       Boost
@@ -723,34 +795,15 @@ automation:
           - conditions:
               - condition: trigger
                 id:
-                  - set_mode
+                  - set_inverter_control_mode
             sequence:
               - metadata: {}
                 data: {}
                 action: rest_command.givenergy_evc_configure_inverter_control
-    mode: single
-    
-  - alias: GivEnergy EVC Charge Power Limit
-    triggers:
-      - trigger: state
-        entity_id:
-          - sensor.givenergy_evc_charge_power_limit
-        from: null
-        to: null
-        id: get_value
-      - trigger: state
-        entity_id:
-          - input_number.givenergy_evc_charge_power_limit
-        from: null
-        to: null
-        id: set_value
-    conditions: []
-    actions:
-      - choose:
           - conditions:
               - condition: trigger
                 id:
-                  - get_value
+                  - get_charge_power_limit_value
             sequence:
               - action: input_number.set_value
                 metadata: {}
@@ -761,7 +814,7 @@ automation:
           - conditions:
               - condition: trigger
                 id:
-                  - set_value
+                  - set_charge_power_limit_value
             sequence:
               - metadata: {}
                 data_template:
@@ -769,27 +822,10 @@ automation:
                     {{ states('input_number.givenergy_evc_charge_power_limit')|int
                     }}
                 action: rest_command.givenergy_evc_charge_power_limit
-    mode: single
-
-  - alias: GivEnergy EVC Configuration Mode
-    triggers:
-      - entity_id:
-          - sensor.givenergy_evc_configuration_mode
-        id: get_mode
-        trigger: state
-      - entity_id:
-          - input_select.givenergy_evc_configuration_mode
-        id: set_mode
-        from: null
-        to: null
-        trigger: state
-    conditions: []
-    actions:
-      - choose:
           - conditions:
               - condition: trigger
                 id:
-                  - get_mode
+                  - get_configuration_mode
             sequence:
               - metadata: {}
                 data:
@@ -814,7 +850,7 @@ automation:
           - conditions:
               - condition: trigger
                 id:
-                  - set_mode
+                  - set_configuration_mode
             sequence:
               - metadata: {}
                 data_template:
@@ -839,86 +875,5 @@ automation:
                       Unknown
                     {% endif %}
                 action: rest_command.givenergy_evc_set_configuration_mode
-    mode: single
-  - alias: GivEnergy EVC Max Import Capacity
-    triggers:
-      - trigger: state
-        entity_id:
-          - sensor.givenergy_evc_max_import_capacity
-        from: null
-        to: null
-        id: get_value
-      - trigger: state
-        entity_id:
-          - input_number.givenergy_evc_max_import_capacity
-        from: null
-        to: null
-        id: set_value
-    conditions: []
-    actions:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id:
-                  - get_value
-            sequence:
-              - action: input_number.set_value
-                metadata: {}
-                data:
-                  value: "{{ states('sensor.givenergy_evc_max_import_capacity')|int }}"
-                target:
-                  entity_id: input_number.givenergy_evc_max_import_capacity
-          - conditions:
-              - condition: trigger
-                id:
-                  - set_value
-            sequence:
-              - metadata: {}
-                data_template:
-                  value: >
-                    {{ states('input_number.givenergy_evc_max_import_capacity')|int
-                    }}
-                action: rest_command.givenergy_evc_max_import_capacity
-    mode: single
-
-  - alias: GivEnergy EVC Session Energy Limit
-    triggers:
-      - trigger: state
-        entity_id:
-          - sensor.givenergy_evc_session_energy_limit
-        from: null
-        to: null
-        id: get_value
-      - trigger: state
-        entity_id:
-          - input_number.givenergy_evc_session_energy_limit
-        from: null
-        to: null
-        id: set_value
-    conditions: []
-    actions:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id:
-                  - get_value
-            sequence:
-              - action: input_number.set_value
-                metadata: {}
-                data:
-                  value: "{{ states('sensor.givenergy_evc_session_energy_limit')|float }}"
-                target:
-                  entity_id: input_number.givenergy_evc_session_energy_limit
-          - conditions:
-              - condition: trigger
-                id:
-                  - set_value
-            sequence:
-              - metadata: {}
-                data_template:
-                  limit: >
-                    {{
-                    states('input_number.givenergy_evc_session_energy_limit')|float
-                    }}
-                action: rest_command.givenergy_evc_session_energy_limit
-    mode: single
+    mode: parallel
+    max: 30
