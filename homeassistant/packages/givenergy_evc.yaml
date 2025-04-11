@@ -11,6 +11,7 @@
 # Credit to Oliver Shingler (AKA Speak To The Geek) for the inspiration.
 #
 # This version has the following differences/improvements;
+# * Addition of ModBusSlave control entities
 # * Single package file which can be dragged and dropped into Home Assistant with little effort
 # * Implements a select (drop down) for the charger mode rather than individual switches. Original switches included for those who prefer them
 # * Split the sensors for "plugged in" and "charging"
@@ -24,8 +25,32 @@ input_select:
       - "Solar"
       - "Hybrid"
       - "Grid"
+      - "Inverter Control"
     initial: "Grid"
     icon: mdi:menu
+  givenergy_evc_configure_inverter_mode:
+    name: "GivEnergy EVC Configure Inverter Mode"
+    options:
+      - "Solar"
+      - "Hybrid"
+      - "Grid"
+    initial: "Grid"
+    icon: mdi:menu
+
+input_number:
+  givenergy_evc_solar_export_split:
+    name: "GivEnergy EVC Solar Export Split"
+    mode: slider
+    min: 0
+    max: 1
+    step: 0.1
+  givenergy_evc_max_battery_discharge_power:
+    name: "GivEnergy EVC Max Battery Discharge Power"
+    mode: slider
+    min: 0
+    max: 24000
+    step: 100
+    unit_of_measurement: w
 
 template:
   - binary_sensor:
@@ -124,6 +149,17 @@ switch:
           service: rest_command.givenergy_evc_setmode
           data:
             mode: Boost
+      givenergy_evc_mode_inverter_control:
+        friendly_name: "GivEnergy EVC Mode: Inverter Control"
+        value_template: "{{ is_state('sensor.givenergy_evc_mode', 'Inverter Control') }}"
+        turn_on:
+          service: rest_command.givenergy_evc_setmode
+          data:
+            mode: ModbusSlave
+        turn_off:
+          service: rest_command.givenergy_evc_setmode
+          data:
+            mode: ModbusSlave
       givenergy_evc_plugandgo:
         friendly_name: "GivEnergy EVC Plug&Go"
         value_template: "{{ is_state('binary_sensor.givenergy_evc_plug_and_go_state', 'on') }}"
@@ -195,6 +231,27 @@ rest_command:
       Accept: "application/json"
       Content-Type: "application/json"
     payload: '{"value": {{ value }}}'
+  givenergy_evc_inverter_control_mode:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/configure-inverter-control/'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: '{"mode": {{ mode }}}'
+  givenergy_evc_configure_inverter_control:
+    url: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/configure-inverter-control/'
+    method: POST
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    payload: >-
+      {
+        "inverter_battery_export_split": {{ states('input_number.givenergy_evc_solar_export_split')|float }},
+        "max_battery_discharge_power_to_evc": {{ states('input_number.givenergy_evc_max_battery_discharge_power')|int }},
+        "mode": {% if is_state('input_select.givenergy_evc_configure_inverter_mode','Solar') %} "SuperEco" {% elif is_state('input_select.givenergy_evc_configure_inverter_mode','Hybrid') %} "Eco" {% else %} "Boost" {% endif %}
+      }
 
 rest:
   - resource_template: "https://api.givenergy.cloud/v1/ev-charger?page=1"
@@ -232,7 +289,7 @@ rest:
       - name: "GivEnergy EVC Power (W)"
         unique_id: givenergy_evc_power_watts
         value_template: >-
-          {% if value_json.data[0].power_now is defined %} 
+          {% if value_json.data[0].power_now is defined %}
             {{ ((value_json.data[0].power_now.value)|float * 1000)|int }}
           {% else %}
             0
@@ -269,9 +326,29 @@ rest:
             Hybrid
           {% elif value_json.data[2].active %}
             Grid
+          {% elif value_json.data[3].active %}
+            Inverter Control
           {% else %}
             Unknown
           {% endif %}
+
+  - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/configure-inverter-control/'
+    scan_interval: 15
+    headers:
+      Authorization: !secret givenergy_apikey
+      Accept: "application/json"
+      Content-Type: "application/json"
+    sensor:
+      - name: "GivEnergy EVC Solar Export Split"
+        unique_id: givenergy_evc_solar_export_split
+        value_template: "{{ value_json.data.inverter_battery_export_split }}"
+      - name: "GivEnergy EVC Max Battery Discharge Power"
+        unique_id: givenergy_evc_max_battery_discharge_power
+        value_template: "{{ value_json.data.max_battery_discharge_power_to_evc }}"
+      - name: "GivEnergy EVC Inverter Control Mode"
+        unique_id: givenergy_evc_inverter_control_mode
+        value_template: "{{ value_json.data.mode }}"
+
   - resource_template: 'https://api.givenergy.cloud/v1/ev-charger/{{ states("sensor.givenergy_evc_uuid") }}/commands/set-plug-and-go/'
     scan_interval: 15
     headers:
@@ -334,7 +411,133 @@ automation:
                       Eco
                     {% elif is_state('input_select.givenergy_evc_mode','Solar') %}
                       SuperEco
+                    {% elif is_state('input_select.givenergy_evc_mode','Grid') %}
+                      Boost
+                    {% else %}
+                      ModbusSlave
+                    {% endif %}
+    mode: single
+  - alias: GivEnergy EVC Max Discharge Power
+    description: ""
+    triggers:
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_max_battery_discharge_power
+        from: null
+        to: null
+        id: get_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_max_battery_discharge_power
+        from: null
+        to: null
+        id: set_value
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_value
+            sequence:
+              - action: input_number.set_value
+                metadata: {}
+                data:
+                  value: >-
+                    {{
+                    states('sensor.givenergy_evc_max_battery_discharge_power')|float
+                    }}
+                target:
+                  entity_id: input_number.givenergy_evc_max_battery_discharge_power
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_value
+            sequence:
+              - metadata: {}
+                data: {}
+                action: rest_command.givenergy_evc_configure_inverter_control
+    mode: single
+
+  - alias: GivEnergy Solar Export Split
+    description: ""
+    triggers:
+      - trigger: state
+        entity_id:
+          - sensor.givenergy_evc_solar_export_split
+        from: null
+        to: null
+        id: get_value
+      - trigger: state
+        entity_id:
+          - input_number.givenergy_evc_solar_export_split
+        from: null
+        to: null
+        id: set_value
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_value
+            sequence:
+              - action: input_number.set_value
+                metadata: {}
+                data:
+                  value: "{{ states('sensor.givenergy_evc_solar_export_split')|float }}"
+                target:
+                  entity_id: input_number.givenergy_evc_solar_export_split
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_value
+            sequence:
+              - metadata: {}
+                data: {}
+                action: rest_command.givenergy_evc_configure_inverter_control
+    mode: single
+
+  - alias: GivEnergy EVC Configure Inverter Mode
+    description: ""
+    triggers:
+      - entity_id:
+          - sensor.givenergy_evc_inverter_control_mode
+        id: get_mode
+        trigger: state
+      - entity_id:
+          - input_select.givenergy_evc_configure_inverter_mode
+        id: set_mode
+        from: null
+        to: null
+        trigger: state
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - get_mode
+            sequence:
+              - metadata: {}
+                data:
+                  option: >-
+                    {% if is_state('sensor.givenergy_evc_inverter_control_mode','SuperEco') %}
+                      Solar
+                    {% elif is_state('sensor.givenergy_evc_inverter_control_mode','Eco') %}
+                      Hybrid
                     {% else %}
                       Boost
                     {% endif %}
+                target:
+                  entity_id: input_select.givenergy_evc_configure_inverter_mode
+                action: input_select.select_option
+          - conditions:
+              - condition: trigger
+                id:
+                  - set_mode
+            sequence:
+              - metadata: {}
+                data: {}
+                action: rest_command.givenergy_evc_configure_inverter_control
     mode: single
