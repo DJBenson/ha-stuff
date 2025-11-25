@@ -1,0 +1,315 @@
+substitutions:
+  devicename: "gosundup111"
+  default_state: "RESTORE_DEFAULT_ON"
+  activity_threshold: "5"
+  active_threshold: "30"
+  decimal_resolution: "1"
+  log_level: INFO
+  web_server_version: "3"
+  
+esphome:
+  name: "${devicename}"
+  name_add_mac_suffix: true
+
+  project:
+    name: djbenson.gosundup111
+    version: "1.0"
+
+# Enable logging
+logger:
+  level: ${log_level}
+
+# Enable Home Assistant API
+api:
+
+# Enable web server on default port
+web_server:
+  port: 80
+  version: ${web_server_version}
+
+dashboard_import:
+  package_import_url: github://DJBenson/ha-stuff/esphome/configs/gosundup111.yaml@main
+  import_full_config: True
+
+# Enable OTA uploads
+ota:
+  - platform: esphome
+  - platform: web_server
+
+debug:
+  update_interval: 30s
+    
+button:
+  - platform: restart
+    name: "Restart"
+  - platform: safe_mode
+    name: "Restart (Safe Mode)"
+  - platform: factory_reset
+    name: "Factory Reset"
+    id: Reset
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+    
+wifi:
+    ap:
+      password: "1234567890"
+
+captive_portal:
+
+improv_serial:
+
+text_sensor:
+  - platform: template
+    name: "Uptime Human Readable"
+    id: uptime_human
+    icon: mdi:clock-start
+    entity_category: diagnostic
+  - platform: debug
+    reset_reason:
+      name: "Reset Reason"
+      entity_category: diagnostic
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: diagnostic
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+    ssid:
+      name: "SSID"
+    bssid:
+      name: "BSSID"
+    mac_address:
+      name: "Mac Address"
+  - platform: template
+    name: "Activity State"
+    lambda: |-
+      if (id(power).state > $active_threshold) {
+        return {"Active"}; }
+      else if ((id(power).state > $activity_threshold) and (id(power).state < $active_threshold)) {
+        return {"Passive"};
+      } else {
+        return {"Idle"};
+      }
+    update_interval: 5s
+
+esp8266:
+  board: esp01_1m
+
+globals:
+  - id: total_energy
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO3
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Button"
+    on_press:
+      - switch.toggle: relay
+    on_multi_click:
+    - timing:
+        - ON for at most 1s
+        - OFF for at most 1s
+        - ON for at most 1s
+        - OFF for at most 1s
+        - ON for at most 1s
+        - OFF for at most 1s
+        - ON for at most 1s
+        - OFF for at most 1s
+        - ON for 0.5s to 1s
+        - OFF for at least 0.2s
+      then:
+        - button.press: Reset
+  
+  - platform: status
+    name: "Server Status"
+
+switch:
+  - platform: gpio
+    name: "Switch"
+    pin: GPIO14
+    id: relay
+    restore_mode: "${default_state}"
+    on_turn_on:
+    - light.turn_on:
+        id: led
+        brightness: 100%
+        transition_length: 0s
+    on_turn_off:
+    - light.turn_off:
+        id: led
+        transition_length: 0s
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: diagnostic
+    internal: true
+
+  # Reports the WiFi signal strength in %
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Strength"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: "Uptime Sensor"
+    id: uptime_sensor
+    update_interval: 60s
+    entity_category: diagnostic
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: uptime_human
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              return (
+                (days ? to_string(days) + "d " : "") +
+                (hours ? to_string(hours) + "h " : "") +
+                (minutes ? to_string(minutes) + "m " : "") +
+                (to_string(seconds) + "s")
+              ).c_str();
+
+  # Power Monitoring
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO12
+      inverted: true
+    cf_pin: GPIO4
+    cf1_pin: GPIO05
+ 
+    current:
+      name: "Current"
+      id: current
+      unit_of_measurement: A
+      accuracy_decimals: "${decimal_resolution}"
+      filters:
+        # Map from sensor -> measured value
+        - calibrate_linear:
+            - 0.0 -> 0.013
+            - 0.08208 -> 0.071
+            - 1.34223 -> 1.066
+            - 5.57170 -> 4.408
+            - 6.69184 -> 5.259
+            - 6.97187 -> 5.540
+        # Normalize for plug load
+        - lambda: if (x < 0.0260) return 0; else return (x - 0.0260);
+
+    voltage:
+      name: "Voltage"
+      id: voltage
+      unit_of_measurement: V
+      accuracy_decimals: "${decimal_resolution}"
+      filters:
+        # Map from sensor -> measured value
+        - calibrate_linear:
+            - 0.0 -> 0.0
+            - 615.6 -> 243.2
+
+    power:
+      name: "Power"
+      id: power
+      unit_of_measurement: W
+      accuracy_decimals: "${decimal_resolution}"
+      filters:
+        # Map from sensor -> measured value
+        - calibrate_linear:
+            - 0.0 -> 1.14
+            - 62.06167 -> 10.93
+            - 1503.27161 -> 247.6
+            - 1599.81213 -> 263.7
+            - 3923.67700 -> 631.4
+            - 7109.50928 -> 1148.0
+            - 7237.0857 -> 1193.0
+            - 7426.71338 -> 1217.0
+            # Normalize for plug load
+        - lambda: if (x < 1.5600) return 0; else return (x - 1.5600);
+    change_mode_every: 1
+    update_interval: 5s
+
+    energy:
+      name: "Energy"
+      id: energy
+      unit_of_measurement: kWh
+      accuracy_decimals: "${decimal_resolution}"
+      filters:
+        # Multiplication factor from W to kW is 0.001
+        - multiply: 0.001
+      on_value:
+        then:
+          - lambda: |-
+              static float previous_energy_value = 0.0;
+              float current_energy_value = id(energy).state;
+              id(total_energy) += current_energy_value - previous_energy_value;
+              previous_energy_value = current_energy_value;
+
+  # Total daily energy sensor
+  - platform: total_daily_energy
+    name: "Daily Energy"
+    power_id: power
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+    unit_of_measurement: kWh
+    accuracy_decimals: "${decimal_resolution}"
+
+  - platform: template
+    name: "Total Energy"
+    unit_of_measurement: kWh
+    accuracy_decimals: "${decimal_resolution}"
+    device_class: "energy"
+    state_class: "total_increasing"
+    icon: "mdi:lightning-bolt"
+    lambda: |-
+      return id(total_energy);
+    update_interval: 10s
+
+  - platform: template
+    name: "Apparent Power"
+    unit_of_measurement: "VA"
+    state_class: "measurement"
+    accuracy_decimals: "${decimal_resolution}"
+    icon: "mdi:lightning-bolt"
+    lambda: |-
+      return id(voltage).state * id(current).state;
+
+  - platform: template
+    name: "Power Factor"
+    accuracy_decimals: "${decimal_resolution}"
+    icon: "mdi:alpha-f-circle-outline"
+    lambda: |-
+      return id(power).state / (id(voltage).state * id(current).state);
+
+output:
+  - platform: esp8266_pwm
+    id: state_led
+    pin:
+      number: GPIO1
+      inverted: true
+
+light:
+  - platform: monochromatic
+    output: state_led
+    id: led
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: True
