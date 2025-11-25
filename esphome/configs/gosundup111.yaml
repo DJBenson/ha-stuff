@@ -1,6 +1,5 @@
 substitutions:
   devicename: "gosundup111"
-  devicename_upper: "Gosund UP111"
   default_state: "RESTORE_DEFAULT_ON"
   activity_threshold: "5"
   active_threshold: "30"
@@ -10,7 +9,6 @@ substitutions:
   
 esphome:
   name: "${devicename}"
-  friendly_name: "${devicename_upper}"
   name_add_mac_suffix: true
 
   project:
