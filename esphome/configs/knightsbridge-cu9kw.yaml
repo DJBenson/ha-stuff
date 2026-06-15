@@ -1,33 +1,71 @@
 substitutions:
-  devicename: "knightsbridge-cu9kw"
-  devicename_upper: Knightsbridge-CU9KW
+  # Short placeholders for reuse in the config
+  name: knightsbridge-cu9kw             # Used as the device hostname/mDNS name
+  friendly_name: Knightsbridge-CU9KW    # Human-readable label for UIs
 
 esphome:
-  name: $devicename
+  name: $name
+  on_boot:
+    priority: 300
+    then:
+      # Initialise multipliers if they haven't been set yet
+      - lambda: |-
+          if (id(voltage_multiply) <= 0) id(voltage_multiply) = 0.3;
+          if (id(power_multiply)   <= 0) id(power_multiply)   = 0.133;
+          if (id(current_multiply) <= 0) id(current_multiply) = 0.805;
+      - globals.set:
+          id: setupComplete
+          value: "true"               # Flag indicating calibration values are initialised
 
 esp8266:
-  # No idea what kind of board is it so using a generic one
   board: esp01_1m
 
 # Enable logging
 logger:
 
-# Enable Home Assistant API
+# Enable Home Assistant API and calibration services
 api:
   encryption:
     key: !secret api_key
+  services:
+    - service: calibrate_voltage
+      variables:
+        actual_value: float
+      then:
+        - lambda: |-
+            id(voltage_multiply) = actual_value / id(voltage).raw_state;
+        - number.set:
+            id: voltage_factor
+            value: !lambda "return id(voltage_multiply);"
+    - service: calibrate_power
+      variables:
+        actual_value: float
+      then:
+        - lambda: |-
+            id(power_multiply) = actual_value / id(power).raw_state;
+        - number.set:
+            id: power_factor
+            value: !lambda "return id(power_multiply);"
+    - service: calibrate_current
+      variables:
+        actual_value: float
+      then:
+        - lambda: |-
+            id(current_multiply) = actual_value / id(current).raw_state;
+        - number.set:
+            id: current_factor
+            value: !lambda "return id(current_multiply);"
 
 improv_serial:
+
 ota:
-  password: !secret ota_password
+  - platform: esphome
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "$devicename Hotspot"
+    ssid: "$friendly_name Hotspot"          # Fallback AP if station mode fails
     password: !secret ap_password
 
 web_server:
@@ -38,35 +76,36 @@ captive_portal:
 output:
   - platform: gpio
     id: relay_1
-    pin: GPIO15 # relay 1
+    pin: GPIO15
   - platform: gpio
     id: relay_2
-    pin: GPIO4 # relay 2
+    pin: GPIO4
   - platform: gpio
     id: led_1
-    pin: 
-      number: GPIO2 # led 1
+    pin:
+      number: GPIO2
       inverted: true
   - platform: gpio
     id: led_2
-    pin: 
-      number: GPIO0 # led 2
+    pin:
+      number: GPIO0
       inverted: true
 
 switch:
   - platform: output
     output: relay_1
-    name: "$devicename Outlet 1"
+    name: "Outlet 1"
     id: cu9kw_socket_1
     icon: mdi:power-socket-uk
     on_turn_on:
       - output.turn_on: led_1
     on_turn_off:
       - output.turn_off: led_1
+
   - platform: output
-    name: "$devicename Outlet 2"
-    id: cu9kw_socket_2
     output: relay_2
+    name: "Outlet 2"
+    id: cu9kw_socket_2
     icon: mdi:power-socket-uk
     on_turn_on:
       - output.turn_on: led_2
@@ -74,14 +113,13 @@ switch:
       - output.turn_off: led_2
 
 binary_sensor:
-
   - platform: gpio
     id: button_1
     pin:
-      number: GPIO16 # button 1
+      number: GPIO16                            # Physical button pin
       mode:
         input: true
-        pullup: false # GPIO16 doesn't have a pullup resistor
+        pullup: false
       inverted: false
     on_press:
       - switch.toggle: cu9kw_socket_1
@@ -89,7 +127,7 @@ binary_sensor:
   - platform: gpio
     id: button_2
     pin:
-      number: GPIO13 # button 2
+      number: GPIO13
       mode:
         input: true
         pullup: true
@@ -98,6 +136,7 @@ binary_sensor:
       - switch.toggle: cu9kw_socket_2
 
 sensor:
+  # Power Monitoring with calibration filters
   - platform: hlw8012
     model: BL0937
     sel_pin:
@@ -105,15 +144,34 @@ sensor:
       inverted: true
     cf_pin: GPIO5
     cf1_pin: GPIO14
-    current:
-      name: "$devicename_upper current"
-    voltage:
-      name: "$devicename_upper voltage"
-    power:
-      name: "$devicename_upper power"
-    energy:
-      name: "$devicename_upper energy"
     update_interval: 10s
+
+    voltage:
+      id: voltage
+      name: "$friendly_name voltage"
+      filters:
+        - lambda: |-
+            return x * id(voltage_multiply);
+
+    power:
+      id: power
+      name: "$friendly_name power"
+      filters:
+        - lambda: |-
+            return x * id(power_multiply);
+
+    current:
+      name: "$friendly_name current"
+      id: current
+      filters:
+        - lambda: |-
+            return x * id(current_multiply);
+
+    energy:
+      id: energy
+      name: "$friendly_name energy"
+
+  # Uptime & Wi-Fi
   - platform: uptime
     name: Uptime Sensor
     id: uptime_sensor
@@ -124,31 +182,33 @@ sensor:
             id: uptime_human
             state: !lambda |-
               int seconds = round(id(uptime_sensor).raw_state);
-              int days = seconds / (24 * 3600);
-              seconds = seconds % (24 * 3600);
-              int hours = seconds / 3600;
-              seconds = seconds % 3600;
-              int minutes = seconds /  60;
-              seconds = seconds % 60;
+              int days    = seconds / (24 * 3600);
+              seconds %= 24 * 3600;
+              int hours   = seconds / 3600;
+              seconds %= 3600;
+              int minutes = seconds / 60;
+              seconds %= 60;
               return (
-                (days ? to_string(days) + "d " : "") +
-                (hours ? to_string(hours) + "h " : "") +
+                (days    ? to_string(days)    + "d " : "") +
+                (hours   ? to_string(hours)   + "h " : "") +
                 (minutes ? to_string(minutes) + "m " : "") +
                 (to_string(seconds) + "s")
               ).c_str();
+
   - platform: wifi_signal
-    name: "$devicename_upper WiFi Signal Sensor"
+    name: "$friendly_name WiFi Signal Sensor"
     update_interval: 60s
+
   - platform: uptime
-    name: "$devicename_upper Uptime Sensor"
+    name: "$friendly_name Uptime Sensor"
 
 button:
   - platform: restart
-    name: "$devicename Restart"
+    name: "Restart"
   - platform: safe_mode
-    name: "$devicename Restart (Safe Mode)"
+    name: "Restart (Safe Mode)"
   - platform: factory_reset
-    name: "$devicename Factory Reset"
+    name: "Factory Reset"
 
 text_sensor:
   - platform: wifi_info
@@ -160,7 +220,74 @@ text_sensor:
       name: "BSSID"
     mac_address:
       name: "Mac Address"
+
   - platform: template
     name: Uptime Human Readable
     id: uptime_human
     icon: mdi:clock-start
+
+# Calibration globals
+globals:
+  - id: voltage_multiply
+    type: float
+    restore_value: true
+    initial_value: "0.3"                  # Default voltage multiplier
+  - id: power_multiply
+    type: float
+    restore_value: true
+    initial_value: "0.133"                # Default power multiplier
+  - id: current_multiply
+    type: float
+    restore_value: true
+    initial_value: "0.805"                # Default current multiplier
+  - id: setupComplete
+    type: bool
+    restore_value: no
+    initial_value: "false"                # Flag set after initial boot
+
+# Expose calibration factors in Home Assistant
+number:
+  - platform: template
+    name: "Voltage Calibration Factor"
+    id: voltage_factor
+    icon: mdi:sine-wave
+    min_value: 0
+    max_value: 10
+    step: 0.001
+    entity_category: diagnostic
+    mode: box
+    lambda: |-
+      return id(voltage_multiply);
+    set_action:
+      lambda: |-
+        id(voltage_multiply) = x;
+
+  - platform: template
+    name: "Power Calibration Factor"
+    id: power_factor
+    icon: mdi:flash
+    min_value: 0
+    max_value: 10
+    step: 0.001
+    entity_category: diagnostic
+    mode: box
+    lambda: |-
+      return id(power_multiply);
+    set_action:
+      lambda: |-
+        id(power_multiply) = x;
+
+  - platform: template
+    name: "Current Calibration Factor"
+    id: current_factor
+    icon: mdi:current-ac
+    min_value: 0
+    max_value: 10
+    step: 0.001
+    entity_category: diagnostic
+    mode: box
+    lambda: |-
+      return id(current_multiply);
+    set_action:
+      lambda: |-
+        id(current_multiply) = x;
