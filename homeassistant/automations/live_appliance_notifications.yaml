@@ -1,0 +1,409 @@
+alias: Bosch Appliance Live Activity Notifications
+description: >-
+  Live Activity on iPhone for Bosch dryer/washer/dishwasher:
+  countdown to a delayed start, replaced by the running countdown, phase updates
+  while running, then a completion card that dismisses itself.
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.bosch_dryer_operation_state
+      - sensor.bosch_washer_operation_state
+      - sensor.bosch_dishwasher_operation_state
+    to: delayedstart
+    id: delayed_start
+  - trigger: state
+    entity_id:
+      - sensor.bosch_dryer_delayed_start_estimated_start_time
+      - sensor.bosch_washer_delayed_start_estimated_start_time
+      - sensor.bosch_dishwasher_delayed_start_estimated_start_time
+    id: delayed_start
+  - trigger: state
+    entity_id:
+      - sensor.bosch_dryer_operation_state
+      - sensor.bosch_washer_operation_state
+      - sensor.bosch_dishwasher_operation_state
+    to: run
+    id: run_start
+  - trigger: state
+    entity_id:
+      - sensor.bosch_dryer_process_phase
+      - sensor.bosch_washer_process_phase
+      - sensor.bosch_dishwasher_program_phase
+    id: phase_update
+  - trigger: state
+    entity_id:
+      - sensor.bosch_dryer_operation_state
+      - sensor.bosch_washer_operation_state
+      - sensor.bosch_dishwasher_operation_state
+    to: pause
+    id: paused
+  - trigger: state
+    entity_id:
+      - sensor.bosch_dryer_operation_state
+      - sensor.bosch_washer_operation_state
+      - sensor.bosch_dishwasher_operation_state
+    to: actionrequired
+    id: action_required
+  - trigger: state
+    entity_id:
+      - sensor.bosch_dryer_operation_state
+      - sensor.bosch_washer_operation_state
+      - sensor.bosch_dishwasher_operation_state
+    to:
+      - finished
+      - aborting
+      - error
+    id: ended
+conditions: []
+variables:
+  appliance: '{{ trigger.entity_id.split(''.'')[1].split(''_'')[1] }}'
+  appliance_title: '{{ device_attr(trigger.entity_id, ''name'') | replace(''Bosch '', '''') }}'
+  tag: bosch_{{ appliance }}
+  op_state_entity: sensor.bosch_{{ appliance }}_operation_state
+  program_entity: sensor.bosch_{{ appliance }}_active_program
+  program_name: >-
+    {{ 'Program' if states(program_entity) in ['unknown', 'unavailable', none,
+    ''] else states(program_entity).split('_')[-1] | capitalize }}
+  icon: >-
+    {{ 'mdi:tumble-dryer' if appliance == 'dryer' else 'mdi:washing-machine' if
+    appliance == 'washer' else 'mdi:dishwasher' }}
+  run_color: >-
+    {{ '#FB8C00' if appliance == 'dryer' else '#2196F3' if appliance == 'washer'
+    else '#26C6DA' }}
+  progress: >-
+    {{ states('sensor.bosch_' ~ appliance ~ '_program_progress') | float(0) |
+    round(0) | int }}
+  remaining_entity: sensor.bosch_{{ appliance }}_remaining_program_time
+  total_hours_entity: sensor.bosch_{{ appliance }}_estimated_total_program_time
+  delayed_entity: sensor.bosch_{{ appliance }}_delayed_start_estimated_start_time
+  start_in_entity: sensor.bosch_{{ appliance }}_start_in
+  remaining_delta: >-
+    {{ ((as_timestamp(states(remaining_entity)) - now().timestamp()) | int) if
+    (state_attr(remaining_entity, 'device_class') == 'timestamp' and
+    states(remaining_entity) not in ['unknown', 'unavailable', none]) else
+    ((states(remaining_entity) | float(-1) * 3600) | int) if
+    states(remaining_entity) not in ['unknown', 'unavailable', none] else -1 }}
+  early_progress: >-
+    {{ (states('sensor.bosch_' ~ appliance ~ '_program_progress') | float(-1)) <
+    5 }}
+  implausible: '{{ remaining_delta <= 0 or (remaining_delta < 120 and early_progress) }}'
+  run_when: >-
+    {{ (states(total_hours_entity) | float(0) * 3600) | int if implausible else
+    remaining_delta }}
+  delay_start_at: >-
+    {{ as_timestamp(states(delayed_entity)) if (state_attr(delayed_entity,
+    'device_class') == 'timestamp' and states(delayed_entity) not in ['unknown',
+    'unavailable', none]) else (now().timestamp() + (states(delayed_entity) |
+    float(0) * 3600)) if states(delayed_entity) not in ['unknown',
+    'unavailable', none] else (now().timestamp() + (states(start_in_entity) |
+    float(0) * 3600)) }}
+  delay_when: '{{ (delay_start_at - now().timestamp()) | int }}'
+  delay_clock: '{{ delay_start_at | timestamp_custom(''%H:%M'', true) }}'
+  phase_entity: >-
+    {{ 'sensor.bosch_dishwasher_program_phase' if appliance == 'dishwasher' else
+    'sensor.bosch_' ~ appliance ~ '_process_phase' }}
+  phase_labels:
+    none: Starting
+    nophase: Running
+    anyphase: Running
+    vacant: Idle
+    prewash: Pre-wash
+    prerinse: Pre-rinse
+    mainwash: Main wash
+    washing: Washing
+    hygiene: Hygiene
+    smartsoak: Soaking
+    soaking: Soaking
+    multiplesoak: Soaking
+    handsoak: Hand soak
+    soakpause: Soak paused
+    soakfinished: Soak finished
+    coldrefreshing: Cold refresh
+    steaming: Steaming
+    steamingactive: Steaming
+    hygienicsteamfogging: Hygienic steam
+    foam: Foam
+    rinsing: Rinsing
+    rinseonly: Rinse only
+    rinsingaquasensor: Rinsing
+    rinsingsoftener: Rinsing (softener)
+    rinsingfoam: Rinsing foam
+    rinsingfoamf21: Rinsing foam
+    finalrinse: Final rinse
+    holdafterrinse: Hold after rinse
+    pumping: Pumping out
+    spinning: Spinning
+    spinningfinal: Final spin
+    intermediatespin: Intermediate spin
+    displayspinabortnospin: No spin
+    lessironing: Less ironing
+    fluffing: Fluffing
+    waterproofing: Waterproofing
+    guardingoxy: Oxygen guard
+    guardingwrinkle: Wrinkle guard
+    generatingozone: Generating ozone
+    degradingozone: Degrading ozone
+    disinfecting: Disinfecting
+    lowtemperaturehygiene: Low-temp hygiene
+    detectingtextile: Detecting fabric
+    detectingsoil: Detecting soil
+    detectingload: Detecting load
+    fillingdetergent: Dispensing detergent
+    quickcare: Quick care
+    depthcarephase1: Depth care (1/2)
+    depthcarephase2: Depth care (2/2)
+    cleaningheatexchanger: Cleaning heat exchanger
+    selfcleaning: Self-cleaning
+    laundryrefreshing: Refreshing
+    reload: Ready to reload
+    hotmoistheatingwetting: Wetting
+    hotmoistheatingheating: Heating
+    hotmoistheatingwashing: Washing
+    heating: Heating
+    drying: Drying
+    moistureremoval: Removing moisture
+    coolingdown: Cooling down
+    additionalcoolingdown: Cooling down
+    cooldown: Cooling down
+    irondryreached: Iron-dry reached
+    cupboarddryreached: Cupboard-dry reached
+    cupboarddryplusreached: Cupboard-dry+ reached
+    slightlydampreached: Slightly damp
+    extradryreached: Extra-dry reached
+    gentlydryreached: Gently-dry reached
+  phase_name: >-
+    {{ phase_labels.get(states(phase_entity), (states(phase_entity) or
+    'Running') | replace('_', ' ') | title) }}
+  action_sensors:
+    dryer:
+      - - door
+        - Door open
+      - - supply_voltage_low
+        - Supply voltage low
+      - - door_not_lockable
+        - Door won't lock
+      - - door_not_unlockable
+        - Door won't unlock
+      - - fatal_error
+        - Fatal error
+    washer:
+      - - door
+        - Door open
+      - - foam_detection
+        - Excess foam detected
+      - - low_water_pressure
+        - Low water pressure
+      - - aquastop_occurred
+        - AquaStop triggered
+      - - problem
+        - i-Dos tray open
+      - - problem_2
+        - Rinse hold pending
+      - - door_not_unlockable
+        - Door won't unlock
+      - - door_not_lockable
+        - Door won't lock
+      - - spin_aborted
+        - Spin aborted
+      - - pump_error
+        - Pump error
+      - - supply_voltage_low
+        - Supply voltage low
+      - - i_dos_defect
+        - i-Dos fault
+      - - water_level_high
+        - Water level high
+      - - fatal_error
+        - Fatal error
+    dishwasher:
+      - - door
+        - Door open
+      - - problem
+        - Machine fault
+      - - low_water_pressure
+        - Low water pressure
+      - - aquastop_occurred
+        - AquaStop triggered
+      - - low_voltage
+        - Low voltage
+      - - draining_not_possible
+        - Draining not possible
+      - - drain_pump_blocked
+        - Drain pump blocked
+  action_reasons: >-
+    {% set ns = namespace(items=[]) %} {% for pair in
+    action_sensors.get(appliance, []) %} {% if states('binary_sensor.bosch_' ~
+    appliance ~ '_' ~ pair[0]) == 'on' %} {% set ns.items = ns.items + [pair[1]]
+    %} {% endif %} {% endfor %} {{ ns.items | unique | join(', ') }}
+  reason_text: >-
+    {{ action_reasons | trim if (action_reasons | trim) else 'Check appliance'
+    }}
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: delayed_start
+          - condition: template
+            value_template: >-
+              {{ states(op_state_entity) == 'delayedstart' and delay_when |
+              int(-1) > 0 }}
+        sequence:
+          - action: notify.mobile_app_myphone
+            data:
+              title: '{{ appliance_title }}'
+              message: '{{ program_name }} · starts at {{ delay_clock }}'
+              data:
+                tag: '{{ tag }}'
+                live_update: true
+                chronometer: true
+                when: '{{ delay_when }}'
+                when_relative: true
+                url: /lovelace-compact/kitchen
+                critical_text: Delayed start
+                notification_icon: '{{ icon }}'
+                notification_icon_color: '#9575CD'
+                color: '#9575CD'
+      - conditions:
+          - condition: trigger
+            id: run_start
+        sequence:
+          - action: notify.mobile_app_myphone
+            data:
+              title: '{{ appliance_title }}'
+              message: '{{ program_name }} · running'
+              data:
+                tag: '{{ tag }}'
+                live_update: true
+                silent: true
+                chronometer: true
+                when: '{{ run_when }}'
+                when_relative: true
+                progress: '{{ progress }}'
+                progress_max: 100
+                progress_bar_direction: increasing
+                url: /lovelace-compact/kitchen
+                critical_text: '{{ phase_name }}'
+                notification_icon: '{{ icon }}'
+                notification_icon_color: '{{ run_color }}'
+                color: '{{ run_color }}'
+      - conditions:
+          - condition: trigger
+            id: phase_update
+          - condition: template
+            value_template: '{{ states(op_state_entity) == ''run'' }}'
+        sequence:
+          - action: notify.mobile_app_myphone
+            data:
+              title: '{{ appliance_title }}'
+              message: '{{ program_name }} · {{ phase_name }}'
+              data:
+                tag: '{{ tag }}'
+                live_update: true
+                silent: true
+                chronometer: true
+                when: '{{ run_when }}'
+                when_relative: true
+                progress: '{{ progress }}'
+                progress_max: 100
+                progress_bar_direction: increasing
+                url: /lovelace-compact/kitchen
+                critical_text: '{{ phase_name }}'
+                notification_icon: '{{ icon }}'
+                notification_icon_color: '{{ run_color }}'
+                color: '{{ run_color }}'
+      - conditions:
+          - condition: trigger
+            id: paused
+        sequence:
+          - action: notify.mobile_app_myphone
+            data:
+              title: '{{ appliance_title }}'
+              message: '{{ program_name }} · Paused'
+              data:
+                tag: '{{ tag }}'
+                live_update: true
+                silent: true
+                progress: '{{ progress }}'
+                progress_max: 100
+                progress_bar_direction: increasing
+                url: /lovelace-compact/kitchen
+                critical_text: Paused
+                notification_icon: '{{ icon }}'
+                notification_icon_color: '{{ run_color }}'
+                color: '{{ run_color }}'
+      - conditions:
+          - condition: trigger
+            id: action_required
+        sequence:
+          - data_template:
+              is_critical: true
+              is_debug: false
+              is_system: false
+              title: '{{ appliance_title }}'
+              message: '{{ appliance_title }} needs attention: {{ reason_text }}.'
+            action: script.notification_handler
+          - action: notify.mobile_app_myphone
+            data:
+              title: '{{ appliance_title }}'
+              message: '{{ program_name }} · Action needed'
+              data:
+                tag: '{{ tag }}'
+                live_update: true
+                silent: true
+                progress: '{{ progress }}'
+                progress_max: 100
+                progress_bar_direction: increasing
+                url: /lovelace-compact/kitchen
+                critical_text: '{{ reason_text }}'
+                notification_icon: '{{ icon }}'
+                notification_icon_color: '#FF9800'
+                color: '#FF9800'
+      - conditions:
+          - condition: trigger
+            id: ended
+        sequence:
+          - data_template:
+              is_critical: true
+              is_debug: false
+              is_system: false
+              title: '{{ appliance_title }}'
+              message: >-
+                {{ appliance_title }} has {{ 'finished' if
+                trigger.to_state.state == 'finished' else 'been aborted' if
+                trigger.to_state.state == 'aborting' else 'reported an error'
+                }}.
+            action: script.notification_handler
+          - action: notify.mobile_app_myphone
+            data:
+              title: '{{ appliance_title }}'
+              message: >-
+                {{ program_name }} · {{ 'complete' if trigger.to_state.state ==
+                'finished' else 'aborted' if trigger.to_state.state ==
+                'aborting' else 'error' }}
+              data:
+                tag: '{{ tag }}'
+                live_update: true
+                silent: true
+                progress: 100
+                progress_max: 100
+                progress_bar_direction: increasing
+                url: /lovelace-compact/kitchen
+                critical_text: >-
+                  {{ 'Complete' if trigger.to_state.state == 'finished' else
+                  'Aborted' if trigger.to_state.state == 'aborting' else 'Error'
+                  }}
+                notification_icon: '{{ icon }}'
+                notification_icon_color: >-
+                  {{ '#4CAF50' if trigger.to_state.state == 'finished' else
+                  '#F44336' }}
+                color: >-
+                  {{ '#4CAF50' if trigger.to_state.state == 'finished' else
+                  '#F44336' }}
+          - delay: '00:00:30'
+          - action: notify.mobile_app_myphone
+            data:
+              message: clear_notification
+              data:
+                tag: '{{ tag }}'
+mode: parallel
+max: 10
